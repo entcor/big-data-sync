@@ -1,0 +1,63 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.startCient = exports.startServer = void 0;
+const node_ipc_1 = __importDefault(require("node-ipc"));
+const dataSync_1 = require("./dataSync");
+function startServer({ nodeId }) {
+    const ipc = new node_ipc_1.default.IPC();
+    ipc.config.logger = () => { };
+    const srvList = new dataSync_1.BigKVSync(false);
+    let client;
+    ipc.config.id = nodeId;
+    ipc.config.retry = 1500;
+    ipc.serve(function () {
+        ipc.server.on('list:state', function (syncState, socket) {
+            client = socket;
+            const syncData = srvList.getDataForSync(syncState);
+            // ipc.log('got a message : ', syncState, 'send:', syncData);
+            ipc.server.emit(socket, 'list:syncData', syncData);
+        });
+        ipc.server.on('socket.disconnected', function () {
+            client = undefined;
+            // ipc.log('client ' + destroyedSocketID + ' has disconnected!');
+        });
+    });
+    ipc.server.start();
+    srvList.onData(data => { if (client)
+        ipc.server.emit(client, 'list:rtdata', JSON.stringify({ data })); });
+    return srvList;
+}
+exports.startServer = startServer;
+function startCient({ nodeId }) {
+    const ipc = new node_ipc_1.default.IPC();
+    ipc.config.logger = () => { };
+    const clientList = new dataSync_1.BigKVSync(false);
+    function sendSyncState() {
+        const syncState = clientList.getSyncState(); // читаем у клиента состояние для отправки на сервер
+        ipc.of[nodeId].emit('list:state', syncState);
+    }
+    ipc.connectTo(nodeId, function () {
+        ipc.of[nodeId].on('connect', function () {
+            sendSyncState();
+        });
+        ipc.of[nodeId].on('disconnect', function () {
+            // ipc.log('disconnected');
+        });
+        ipc.of[nodeId].on('list:syncData', //any event or message type your server listens for
+        function (syncData) {
+            // ipc.log('1111111 got a message from');
+            clientList.setSyncItems(syncData);
+        });
+        ipc.of[nodeId].on('list:rtdata', //any event or message type your server listens for
+        function (rtData) {
+            // ipc.log('222222222 got a message from', rtData);
+            clientList.setSyncItems(rtData);
+        });
+    });
+    return clientList;
+}
+exports.startCient = startCient;
+//# sourceMappingURL=ipcSync.js.map
