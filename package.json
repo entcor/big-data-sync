@@ -13,7 +13,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "node-ipc": "git+https://github.com/RIAEvangelist/node-ipc/"
+    "node-ipc": "git+http://uni-as.uni-eng.ru:7990/scm/mosaic/lib-node-ipc.git"
   },
   "devDependencies": {
     "@types/node": "^17.0.23",
