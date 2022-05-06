@@ -21,6 +21,8 @@ export function startServer({ nodeId }: {nodeId: string}): BigKVSync  {
                     ipc.server.emit(socket, 'list:syncData', syncData);
                 }
             );
+            ipc.server.on('connect', () => console.log('connect'));
+            ipc.server.on('disconnect', () => console.log('disconnect'));
             ipc.server.on(
                 'socket.disconnected',
                 function() {
@@ -54,12 +56,14 @@ export function startCient({ nodeId }: {nodeId: string}) {
             ipc.of[nodeId].on(
                 'connect',
                 function(){
+                    console.log('connect client');
                     sendSyncState();
                 }
             );
             ipc.of[nodeId].on(
                 'disconnect',
                 function(){
+                    console.log('disconnect client');
                     // ipc.log('disconnected');
                 }
             );
