@@ -15,20 +15,23 @@ class BigKVSync extends stream_1.EventEmitter {
     set(k, v) {
         if (this.client)
             throw new Error('client can`t set data');
-        const str = JSON.stringify(v);
+        const str = v === undefined ? undefined : JSON.stringify(v);
         if (this.values[k] && str === this.values[k].str)
             return; // object is not changed 
-        this.values[k] = { rt: new Date(), v, str };
+        const now = new Date();
+        this.values[k] = { rt: now, v, str };
+        if (!v)
+            delete this.values[k];
         if (this.$onData)
-            this.$onData({ [k]: this.values[k].v });
+            this.$onData({ [k]: v || null }, now);
     }
     debug() {
         return this.values;
     }
-    onData(fn) {
-        this.$onData = fn;
-    }
+    onData(fn) { this.$onData = fn; }
+    onDelete(fn) { this.$onDelete = fn; }
     // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
+    // выполняет клиент
     getSyncState() {
         const syncRtList = Object.keys(this.values)
             .reduce((prev, key) => {
@@ -51,18 +54,36 @@ class BigKVSync extends stream_1.EventEmitter {
         });
         return `{"rt":"${new Date()}","data":{${strItems.join(',')}}}`;
     }
-    setSyncItems(strData) {
+    setSyncItems(strData, bulk) {
         try {
             const { rt, data } = JSON.parse(strData);
-            if (rt)
-                this.syncTime = rt; // если нет rt - значит это отдельные параметры (поток)
+            if (bulk)
+                this.syncTime = rt;
             const evData = {};
             Object.keys(data).forEach(key => {
-                this.values[key] = { rt, v: data[key] };
-                evData[key] = this.values[key].v;
+                if (data[key] === null && this.values[key]) {
+                    const $val = this.values[key];
+                    delete this.values[key];
+                    if (this.$onDelete)
+                        this.$onDelete(key, $val.v);
+                }
+                else {
+                    this.values[key] = { rt, v: data[key] };
+                    evData[key] = this.values[key].v;
+                }
             });
-            if (this.$onData)
-                this.$onData(evData);
+            if (bulk) { // синхронизация куска данных - надо удалить все старое что не пришло - значит удалено
+                for (const key in this.values) {
+                    if (this.values[key].rt < rt) {
+                        const $val = this.values[key];
+                        delete this.values[key];
+                        if (this.$onDelete)
+                            this.$onDelete(key, $val.v);
+                    }
+                }
+            }
+            if (this.$onData && Object.keys(evData).length)
+                this.$onData(evData, rt);
         }
         catch (ex) {
             this.emit('error', ex.message);
@@ -70,25 +91,4 @@ class BigKVSync extends stream_1.EventEmitter {
     }
 }
 exports.BigKVSync = BigKVSync;
-// function testCall() {
-//     console.log('start sync');
-//     const srv  = new BigKVSync(false);
-//     const clnt = new BigKVSync(true);
-//     // data  = { key: value, key: value, .... }
-//     srv.onData(data => clnt.setItems(data));
-//     clnt.onData(data => console.log(data));
-//     setInterval(() => {
-//         srv.set(`data$${Math.round(Math.random()*100)}`, { data: Math.random() })
-//         setTimeout(() => {
-//             console.log('server:', srv.debug() );
-//             console.log('client:', clnt.debug() );
-//         }, 500)
-//     }, 5000);
-//     setInterval(() => {
-//         const syncState = clnt.getSyncState(); // читаем у клиента состояние для отправки на сервер
-//         const syncData = srv.getDataForSync(syncState); // читаем данные для синхронизции у сервера
-//         clnt.setSyncItems(syncData); // записываем данные на клиента
-//     }, 30 * 1000);
-// }
-// testCall();
 //# sourceMappingURL=dataSync.js.map

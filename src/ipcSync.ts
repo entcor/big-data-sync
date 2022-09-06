@@ -34,7 +34,7 @@ export function startServer({ nodeId }: {nodeId: string}): BigKVSync  {
     );
     
     ipc.server.start();
-    srvList.onData(data => { if (client) ipc.server.emit(client, 'list:rtdata', JSON.stringify({ data }) )});
+    srvList.onData((data, rt)=> { if (client) ipc.server.emit(client, 'list:rtdata', JSON.stringify({ data, rt }) )});
 
     return srvList;
 }
@@ -68,17 +68,17 @@ export function startCient({ nodeId }: {nodeId: string}) {
                 }
             );
             ipc.of[nodeId].on(
-                'list:syncData',  //any event or message type your server listens for
+                'list:syncData',  //срезовая синхронизация
                 function(syncData) {
                     // ipc.log('1111111 got a message from');
-                    clientList.setSyncItems(syncData);
+                    clientList.setSyncItems(syncData, true);
                 }
             );
             ipc.of[nodeId].on(
-                'list:rtdata',  //any event or message type your server listens for
+                'list:rtdata',  //real time data - при изменении параметра
                 function(rtData) {
                     // ipc.log('222222222 got a message from', rtData);
-                    clientList.setSyncItems(rtData);
+                    clientList.setSyncItems(rtData, false);
                 }
             );
         }
