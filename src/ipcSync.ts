@@ -63,7 +63,7 @@ export function startCient({ nodeId }: {nodeId: string}) {
             ipc.of[nodeId].on(
                 'disconnect',
                 function(){
-                    console.log('disconnect client');
+                    // console.log('disconnect client');
                     // ipc.log('disconnected');
                 }
             );

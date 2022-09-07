@@ -30,7 +30,7 @@ interface BSSyncItems {
 
 export class BigKVSync extends EventEmitter {
     values: {[key: string]: BSValue} = {};
-    private $onData: undefined | ((data: {[key: string]: BSValue}, rt: Date) => void);
+    private $onData: undefined | ((data: {[key: string]: BSValue}, rt: Date, bulk: boolean) => void);
     private $onDelete: undefined | ((key: string, data: {[key: string]: BSValue}) => void);
     private syncTime: Date;
 
@@ -50,14 +50,14 @@ export class BigKVSync extends EventEmitter {
         const now = new Date();
         this.values[k] = {rt: now, v, str};
         if (!v) delete this.values[k];
-        if (this.$onData) this.$onData({[k]: v || null}, now);
+        if (this.$onData) this.$onData({[k]: v || null}, now, false);
     }
 
     debug() {
         return this.values;
     }
 
-    onData(fn: (data: {[key: string]: any}, rt: Date) => void) { this.$onData = fn; }
+    onData(fn: (data: {[key: string]: any}, rt: Date, bulk: boolean) => void) { this.$onData = fn; }
     onDelete(fn: (key: string, data: {[key: string]: any}) => void) { this.$onDelete = fn; }
 
     // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
@@ -114,7 +114,7 @@ export class BigKVSync extends EventEmitter {
                 }
             }
 
-            if (this.$onData && Object.keys(evData).length) this.$onData(evData, rt);
+            if (this.$onData && Object.keys(evData).length) this.$onData(evData, rt, bulk);
         } catch (ex) {
             this.emit('error', ex.message);
         }
