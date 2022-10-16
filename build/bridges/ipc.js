@@ -33,7 +33,7 @@ class Bridge {
         });
         this.ipc.server.start();
         this.bds.on('data', ($d) => {
-            logd('IPC server=>data', $d);
+            logd('IPC server=>data');
             const sendData = this.bds.pack($d.rt, $d.data);
             if (client)
                 this.ipc.server.emit(client, `list:rtdata`, sendData);
