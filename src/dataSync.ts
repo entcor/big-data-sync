@@ -159,6 +159,7 @@ export default class BDS extends EventEmitter {
       
       if (bulk) { // синхронизация куска данных - надо удалить все старое что не пришло - значит удалено
         for (const key in this.values) {
+          console.log("........", key, this.values[key].rt, rt)
           if (this.values[key].rt < rt) {
             const $val = this.values[key];
             delete this.values[key];
