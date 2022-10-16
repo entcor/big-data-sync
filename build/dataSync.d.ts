@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { EventEmitter } from "stream";
+import { EventEmitter } from "events";
 import { CacheIf } from "./interfaces";
 export interface BSValue {
     rt: Date;

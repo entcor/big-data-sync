@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const stream_1 = require("stream");
+const events_1 = require("events");
 const splitter = '#@%@#';
 ;
-class BDS extends stream_1.EventEmitter {
+class BDS extends events_1.EventEmitter {
     constructor(proxyMode, cache) {
         super();
         this.proxyMode = proxyMode;
