@@ -59,7 +59,7 @@ class Bridge {
                 sendSyncState();
             });
             this.ipc.of[this.nodeId].on('disconnect', () => {
-                logd('IPC client => disconnected');
+                // logd('IPC client => disconnected');
             });
             this.ipc.of[this.nodeId].on('list:syncData', //срезовая синхронизация
             (syncData) => {
@@ -68,7 +68,7 @@ class Bridge {
             });
             this.ipc.of[this.nodeId].on('list:rtdata', //real time data - при изменении параметра
             (rtData) => {
-                logd('IPC client => setSyncItems');
+                logd('IPC client => setSyncItems', rtData);
                 this.bds.setSyncItems(rtData, false);
             });
         });

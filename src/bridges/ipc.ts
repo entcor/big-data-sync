@@ -24,21 +24,21 @@ export default class Bridge {
         () => {
           logd('ipc => serve start', this.nodeId); 
 
-            this.ipc.server.on(`list:state`,
-                (syncState, socket) => {
-                    client = socket;
-                    const syncData = this.bds.getDataForSync(syncState);
-                    this.ipc.server.emit(socket, `list:syncData`, syncData);
-                }
-            );
-            this.ipc.server.on('connect', () => logd('ipc server => connected'));
-            this.ipc.server.on('disconnect', () => logd('ipc server => disconnected'));
-            this.ipc.server.on('socket.disconnected',
-                () => {
-                    logd('ipc => socket connected') 
-                    client = undefined;
-                }
-            );
+          this.ipc.server.on(`list:state`,
+              (syncState, socket) => {
+                  client = socket;
+                  const syncData = this.bds.getDataForSync(syncState);
+                  this.ipc.server.emit(socket, `list:syncData`, syncData);
+              }
+          );
+          this.ipc.server.on('connect', () => logd('ipc server => connected'));
+          this.ipc.server.on('disconnect', () => logd('ipc server => disconnected'));
+          this.ipc.server.on('socket.disconnected',
+              () => {
+                  logd('ipc => socket connected') 
+                  client = undefined;
+              }
+          );
         }
       );
       
@@ -81,7 +81,7 @@ export default class Bridge {
               this.ipc.of[this.nodeId].on(
                   'disconnect',
                   () => {
-                    logd('IPC client => disconnected');
+                    // logd('IPC client => disconnected');
                   }
               );
               this.ipc.of[this.nodeId].on(
@@ -94,7 +94,7 @@ export default class Bridge {
               this.ipc.of[this.nodeId].on(
                   'list:rtdata',  //real time data - при изменении параметра
                   (rtData) => {
-                    logd('IPC client => setSyncItems');
+                    logd('IPC client => setSyncItems', rtData);
                     this.bds.setSyncItems(rtData, false);
                   }
               );
