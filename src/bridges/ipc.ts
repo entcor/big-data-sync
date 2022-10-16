@@ -1,7 +1,7 @@
 import IPC from 'node-ipc';
 import BigKVSync, { DataEvent } from '../dataSync';
 import TagLogger from 'etaglogger';
-const logd = TagLogger('IPC');
+const logd = TagLogger('BDS.IPC');
 
 export default class Bridge {
     private ipc: IPC.IPC;

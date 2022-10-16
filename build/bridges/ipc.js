@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_ipc_1 = __importDefault(require("node-ipc"));
 const etaglogger_1 = __importDefault(require("etaglogger"));
-const logd = (0, etaglogger_1.default)('IPC');
+const logd = (0, etaglogger_1.default)('BDS.IPC');
 class Bridge {
     constructor(nodeId, bds) {
         this.nodeId = nodeId;

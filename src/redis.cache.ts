@@ -1,4 +1,8 @@
 import { CacheIf } from "./interfaces";
+import TagLogger from 'etaglogger';
+
+const logd = TagLogger('BDS.CACHE');
+
 const splitter = '@#$%$#@';
 
 export class RedisCache implements CacheIf {
@@ -16,6 +20,7 @@ export class RedisCache implements CacheIf {
   }
 
   async restore(): Promise<{[key: string]: { rt: Date, str: string }}> {
+    logd('bds cache => cache restore')
     const data: { [key:string]: string } = await this.redisClient.HGETALL(this.nodeId) || {};
     const res = {};
 
@@ -26,6 +31,8 @@ export class RedisCache implements CacheIf {
         try { res[key] = { rt: new Date(rtstr), str }; } 
         catch (ex) { }
       })
+
+    logd('bds cache => cache restored', Object.keys(res).length);
 
     return res;
   }
