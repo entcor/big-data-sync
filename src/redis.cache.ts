@@ -1,5 +1,6 @@
 import { CacheIf } from "./interfaces";
 import TagLogger from 'etaglogger';
+import { promisify } from "util";
 
 const logd = TagLogger('BDS.CACHE');
 
@@ -23,7 +24,8 @@ export class RedisCache implements CacheIf {
 
   async restore(): Promise<{[key: string]: { rt: Date, str: string }}> {
     logd('bds cache => cache restore')
-    const data: { [key:string]: string } = await this.redisClient.HGETALL(this.nodeId) || {};
+    const HGETALL = promisify(this.redisClient.HGETALL).bind(this.redisClient);
+    const data: { [key:string]: string } = await HGETALL(this.nodeId);
     const res = {};
 
     Object.keys(data)

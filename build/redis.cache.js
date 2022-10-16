@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RedisCache = void 0;
 const etaglogger_1 = __importDefault(require("etaglogger"));
+const util_1 = require("util");
 const logd = (0, etaglogger_1.default)('BDS.CACHE');
 const splitter = '@#$%$#@';
 class RedisCache {
@@ -22,7 +23,8 @@ class RedisCache {
     }
     async restore() {
         logd('bds cache => cache restore');
-        const data = await this.redisClient.HGETALL(this.nodeId) || {};
+        const HGETALL = (0, util_1.promisify)(this.redisClient.HGETALL).bind(this.redisClient);
+        const data = await HGETALL(this.nodeId);
         const res = {};
         Object.keys(data)
             .forEach(key => {
