@@ -56,7 +56,7 @@ export default class BDS extends EventEmitter {
     }
   }
 
-  keys() {
+  keys(): string[] {
     return Object.keys(this.values);
   }
 
