@@ -1,4 +1,4 @@
-export * from './dataSync';
-export * from './bridges/ipc';
-export * from './bridges/socketio';
+export { default as BDS, BSValue, DataEvent } from './dataSync';
+export { default as IPCBridge } from './bridges/ipc';
+export { default as SIOBridge } from './bridges/socketio';
 //# sourceMappingURL=index.d.ts.map
