@@ -8,6 +8,10 @@
     "inlineSourceMap": false,
     "sourceMap": true,
 
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": true,
+
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
 
     /* Additional Checks */
