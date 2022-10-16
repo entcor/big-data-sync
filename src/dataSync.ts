@@ -56,6 +56,10 @@ export default class BDS extends EventEmitter {
     }
   }
 
+  keys() {
+    return Object.keys(this.values);
+  }
+
   set (k: string, v: any) {
     const str = v === undefined ? undefined : JSON.stringify(v);
     if ((!this.values[k] && !str) || ( this.values[k] && str === this.values[k].str)) return; // object is not changed

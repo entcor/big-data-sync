@@ -5,8 +5,7 @@ export class RedisCache implements CacheIf {
   constructor(
     private readonly nodeId: string,
     private readonly redisClient,
-  ) {
-  }
+  ) {}
 
   set(id: string, rt: Date, value: string): Promise<void> {
     return this.redisClient.HSET(this.nodeId, id, `${rt.toString()}${splitter}${value}`);

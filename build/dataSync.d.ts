@@ -28,6 +28,7 @@ export default class BDS extends EventEmitter {
     private syncTime;
     constructor(proxyMode: boolean, cache?: CacheIf);
     init(): Promise<void>;
+    keys(): string[];
     set(k: string, v: any): void;
     debug(): {
         [key: string]: BSValue;

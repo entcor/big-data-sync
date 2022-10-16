@@ -11,10 +11,9 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const io = new Server(server);
-const redisClient = createClient({ database: 3 });
+const redisClient = createClient({ db: 3 });
 
 async function init() {
-    await redisClient.connect();
     server.listen(3000, () => {
       console.log('listening on *:3000');
     });
