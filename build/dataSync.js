@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const stream_1 = require("stream");
 const splitter = '#@%@#';
 ;
-class BigKVSync extends stream_1.EventEmitter {
+class BDS extends stream_1.EventEmitter {
     constructor(proxyMode, cache) {
         super();
         this.proxyMode = proxyMode;
@@ -138,5 +138,5 @@ class BigKVSync extends stream_1.EventEmitter {
         }
     }
 }
-exports.default = BigKVSync;
+exports.default = BDS;
 //# sourceMappingURL=dataSync.js.map

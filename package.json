@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "author": "Alexey P Nikitin (entcor)",
   "description": "",
-  "main": "build/ipcSync.js",
+  "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "run-s clean && run-p build:* && yarn copy-files",
