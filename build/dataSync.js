@@ -41,7 +41,7 @@ class BDS extends events_1.EventEmitter {
             return;
         }
         if (this.cache)
-            this.cache.set(k, now, str).catch(console.error);
+            this.cache.set(k, now, str);
         this.emit("data", {
             data: { [k]: { str, v } || null },
             rt: now,

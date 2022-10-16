@@ -73,7 +73,7 @@ export default class BDS extends EventEmitter {
       return;
     }
 
-    if (this.cache) this.cache.set(k, now, str).catch(console.error);
+    if (this.cache) this.cache.set(k, now, str);
     this.emit("data", {
       data: {[k]: { str, v } || null},
       rt: now,
