@@ -1,5 +1,7 @@
 import IPC from 'node-ipc';
 import BigKVSync, { DataEvent } from '../dataSync';
+import TagLogger from 'etaglogger';
+const logd = TagLogger('IPC');
 
 export default class Bridge {
     private ipc: IPC.IPC;
@@ -27,11 +29,11 @@ export default class Bridge {
                     this.ipc.server.emit(socket, `list:syncData`, syncData);
                 }
             );
-            // this.ipc.server.on('connect', () => console.log('connect'));
-            // this.ipc.server.on('disconnect', () => console.log('disconnect'));
-            this.ipc.server.on(
-                'socket.disconnected',
+            this.ipc.server.on('connect', () => logd('ipc service connected'));
+            this.ipc.server.on('disconnect', () => logd('ipc service disconnected'));
+            this.ipc.server.on('socket.disconnected',
                 () => {
+                    logd('ipc=>socket connected') 
                     client = undefined;
                 }
             );
@@ -40,11 +42,13 @@ export default class Bridge {
       
       this.ipc.server.start();
       this.bds.on('data', ($d: DataEvent)=> {
+        logd('IPC server=>data', $d);
         const sendData = this.bds.pack($d.rt, $d.data);
         if (client) this.ipc.server.emit(client, `list:rtdata`, sendData)}
       );
 
-      this.bds.on('delete', (id: string)=> {        
+      this.bds.on('delete', (id: string)=> {
+        logd('IPC server=>delete', id);
         const sendData = this.bds.pack(new Date(), { [id]: undefined });
         if (client) this.ipc.server.emit(client, `list:rtdata`, sendData)}
       );
@@ -66,25 +70,27 @@ export default class Bridge {
               this.ipc.of[this.nodeId].on(
                   'connect',
                   () => {
-                      // console.log('connect client');
+                      logd('IPC client=>connected');
                       sendSyncState();
                   }
               );
               this.ipc.of[this.nodeId].on(
                   'disconnect',
                   () => {
-                      // debug('disconnect client');
+                    logd('IPC client=>disconnected');
                   }
               );
               this.ipc.of[this.nodeId].on(
                   'list:syncData',  //срезовая синхронизация
                   (syncData) => {
+                    logd('IPC client=>setSyncItems');
                     this.bds.setSyncItems(syncData, true);
                   }
               );
               this.ipc.of[this.nodeId].on(
                   'list:rtdata',  //real time data - при изменении параметра
                   (rtData) => {
+                    logd('IPC client=>setSyncItems');
                     this.bds.setSyncItems(rtData, false);
                   }
               );

@@ -12,7 +12,9 @@
     "copy-files": "copyfiles -u 1 src/**/*.csv ./build/"
   },
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "etaglogger": "entcor/taglogger"
+  },
   "devDependencies": {
     "@types/node": "^18.11.0",
     "@types/redis": "^4.0.11",
