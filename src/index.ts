@@ -1,3 +1,4 @@
 export { default as BDS, BSValue, DataEvent } from './dataSync';
-export { default as IPCBridge } from './bridges/ipc';
-export { default as SIOBridge } from './bridges/socketio';
+export { default as IpcBridge } from './bridges/ipc';
+export { default as SioBridge } from './bridges/socketio';
+export { RedisCache as BdsRedisCache } from './redis.cache';
