@@ -13,9 +13,11 @@ class RedisCache {
         this.redisClient = redisClient;
     }
     set(id, rt, value) {
+        logd('bds cache => set', id);
         return this.redisClient.HSET(this.nodeId, id, `${rt.toString()}${splitter}${value}`);
     }
     delete(id) {
+        logd('bds cache => delete', id);
         return this.redisClient.HDEL(this.nodeId, id);
     }
     async restore() {

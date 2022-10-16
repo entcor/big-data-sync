@@ -12,10 +12,12 @@ export class RedisCache implements CacheIf {
   ) {}
 
   set(id: string, rt: Date, value: string): Promise<void> {
+    logd('bds cache => set', id)
     return this.redisClient.HSET(this.nodeId, id, `${rt.toString()}${splitter}${value}`);
   }
 
   delete(id: string) {
+    logd('bds cache => delete', id)
     return this.redisClient.HDEL(this.nodeId, id);
   }
 
