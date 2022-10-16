@@ -22,7 +22,9 @@ export default class Bridge {
       
       this.ipc.serve(
         () => {
-          this.ipc.server.on(`list:state`,
+          logd('ipc=>serve start') 
+
+            this.ipc.server.on(`list:state`,
                 (syncState, socket) => {
                     client = socket;
                     const syncData = this.bds.getDataForSync(syncState);
