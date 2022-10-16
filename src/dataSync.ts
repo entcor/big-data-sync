@@ -1,4 +1,6 @@
 import { EventEmitter } from "stream";
+import { CacheIf } from "./interfaces";
+const splitter = '#@%@#';
 
 // realTimeSync: server (set) => send to client (clnt.setFromServer()) => client.onData()
 // при изменени параметра - сервер передаст изменение на клиент
@@ -11,112 +13,166 @@ import { EventEmitter } from "stream";
 // сервверр проверить и выберет все параметры, которые имеют время обновления после последнего 
 // времени синхронизации и не входят в присланный клиентом список 
 
-interface BSValue {
+export interface BSValue {
     rt: Date,
     v: any
-    str?: string,
+    str: string,
 };
+
+export interface DataEvent {
+  data: {[key: string]: BSValue};
+  rt: Date,
+  bulk: boolean,
+}
 
 interface BSSyncState {
     rt: Date;
     data: {[key: string]: boolean};
 }
 
-interface BSSyncItems {
-    bulk: boolean;
-    rt: Date;
-    data: {[key: string]: string};
-}
+export default class BDS extends EventEmitter {
+  values: {[key: string]: BSValue} = {};
+  private syncTime: Date;
 
-export class BigKVSync extends EventEmitter {
-    values: {[key: string]: BSValue} = {};
-    private $onData: undefined | ((data: {[key: string]: BSValue}, rt: Date, bulk: boolean) => void);
-    private $onDelete: undefined | ((key: string, data: {[key: string]: BSValue}) => void);
-    private syncTime: Date;
+  constructor(
+    private readonly proxyMode: boolean,
+    private readonly cache?: CacheIf,
+  ) {
+    super();
+    this.syncTime = new Date(0);
+    this.values = {};
+  }
 
-    constructor(private client: boolean) {
-        super();
-        this.syncTime = new Date(0);
-        this.values = {};
-        this.$onData = undefined;
+  async init() {
+    if (this.cache) {
+      const data = await this.cache.restore();
+      Object.keys(data).forEach(key => {
+        this.values[key] = {
+          rt: data[key].rt,
+          v: !this.proxyMode && JSON.parse(data[key].str),
+          str: data[key].str,
+        };
+      })
+    }
+  }
+
+  set (k: string, v: any) {
+    const str = v === undefined ? undefined : JSON.stringify(v);
+    if ((!this.values[k] && !str) || ( this.values[k] && str === this.values[k].str)) return; // object is not changed
+
+    const now = new Date();
+    this.values[k] = {rt: now, v, str};
+    if (!v) {
+      this.emit("delete", k, this.values[k]);
+      delete this.values[k];
+      if (this.cache) this.cache.delete(k);
+      return;
     }
 
-    set (k: string, v: any) {
-        if (this.client) throw new Error('client can`t set data');
+    if (this.cache) this.cache.set(k, now, str).catch(console.error);
+    this.emit("data", {
+      data: {[k]: { str, v } || null},
+      rt: now,
+      bulk: false,
+    } as DataEvent);
+  }
 
-        const str = v === undefined ? undefined : JSON.stringify(v);
-        if (this.values[k] && str === this.values[k].str) return; // object is not changed 
+  debug() {
+    return this.values;
+  }
 
-        const now = new Date();
-        this.values[k] = {rt: now, v, str};
-        if (!v) delete this.values[k];
-        if (this.$onData) this.$onData({[k]: v || null}, now, false);
+  // метод клиента
+  // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
+  getSyncState(): BSSyncState {
+    const syncRtList = Object.keys(this.values)
+        .reduce((prev, key) => {
+            if (this.values[key].rt > this.syncTime) prev[key] = 1;
+            return prev;
+        }, {} as any);
+
+    return {
+        rt: this.syncTime,
+        data: syncRtList,
     }
+  }
 
-    debug() {
-        return this.values;
-    }
-
-    onData(fn: (data: {[key: string]: any}, rt: Date, bulk: boolean) => void) { this.$onData = fn; }
-    onDelete(fn: (key: string, data: {[key: string]: any}) => void) { this.$onDelete = fn; }
-
-    // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
-    // выполняет клиент
-    getSyncState(): BSSyncState {
-        const syncRtList = Object.keys(this.values)
-            .reduce((prev, key) => {
-                if (this.values[key].rt > this.syncTime) prev[key] = 1;
-                return prev;
-            }, {} as any);
-
-        return {
-            rt: this.syncTime,
-            data: syncRtList,
+  // метод сервера
+  // принятие рещение о недостающих элементах на основании состоянии клиента
+  getDataForSync(clientData: BSSyncState): string {
+    const strItems = []; 
+    Object.keys(this.values)
+      .forEach((key) => {
+        if (this.values[key].rt > clientData.rt || !clientData.data[key]) {
+          strItems.push(`${key}${splitter}${this.values[key].str}`);
         }
-    }
+      });
 
-    getDataForSync(clientData: BSSyncState): string {
-        const strItems = []; 
-        Object.keys(this.values)
-            .forEach((key) => {
-                if (this.values[key].rt > clientData.rt || !clientData.data[key]) {
-                    strItems.push(`"${key}":${this.values[key].str}`)
-                }
-            });
+    // rt###key1###value1###key2###value2 ..........
+    return `${(new Date()).toISOString()}${splitter}${strItems.join(splitter)}`;
+  }
 
-        return `{"rt":"${new Date()}","data":{${strItems.join(',')}}}`;
-    }
+  public pack(rt: Date, data: {[key: string]: BSValue}) {
+    const strItems = [];
+    Object.keys(data || {}).forEach(key => {
+      const $str = data[key]?.str;
+      strItems.push(`${key}${splitter}${$str}`);
+    }) 
+    return `${(rt).toISOString()}${splitter}${strItems.join(splitter)}`;
+  }
 
-    setSyncItems(strData: string, bulk: boolean) {
-        try {
-            const {rt, data}: BSSyncItems = JSON.parse(strData);
-            if (bulk) this.syncTime = rt;
+  // метод клиента
+  // межсерверная синхронизация (bulk - срезовая)
+  setSyncItems(strData: string, bulk: boolean) {
+    try {
+      const items = strData.split(splitter).filter(el => !!el);
+      const rt = new Date(items.shift());
 
-            const evData: {[key: string]: BSValue} = {};
-            Object.keys(data).forEach(key => {
-                if (data[key] === null && this.values[key]) {
-                    const $val = this.values[key];
-                    delete this.values[key];
-                    if (this.$onDelete) this.$onDelete(key, $val.v);
-                } else {
-                    this.values[key] = { rt, v: data[key] };
-                    evData[key] = this.values[key].v;
-                }
-            })
-            
-            if (bulk) { // синхронизация куска данных - надо удалить все старое что не пришло - значит удалено
-                for (const key in this.values) {
-                    if (this.values[key].rt < rt) {
-                        const $val = this.values[key];
-                        delete this.values[key];
-                        if (this.$onDelete) this.$onDelete(key, $val.v);
-                    }
-                }
-            }
-
-            if (this.$onData && Object.keys(evData).length) this.$onData(evData, rt, bulk);
-        } catch (ex) {
-            this.emit('error', ex.message);
+      const data = {};
+      for (let i=0; i < items.length; i += 2) {
+        data[items[i]] = items[i+1] === 'undefined' ? null : {
+          str: items[i+1],
+          v: this.proxyMode ? undefined : JSON.parse(items[i+1]),
         }
+      }
+
+      if (bulk) this.syncTime = rt;
+
+      const evData: DataEvent = { data: {}, rt, bulk };
+      Object.keys(data).forEach(key => {
+        if (data[key] === null) {
+          const $val = this.values[key];
+
+          if ($val) {
+            delete this.values[key];
+            this.emit("delete", key, $val.v);
+            this.cache.delete(key);
+          }
+        } else {
+          this.values[key] = data[key];
+          evData.data[key] = { rt, ...data[key] };
+        }
+      })
+      
+      if (bulk) { // синхронизация куска данных - надо удалить все старое что не пришло - значит удалено
+        for (const key in this.values) {
+          if (this.values[key].rt < rt) {
+            const $val = this.values[key];
+            delete this.values[key];
+            this.emit("delete", key, $val.v );
+            if (this.cache) this.cache.delete(key);
+          }
+        }
+      }
+
+      if (this.cache) {
+        Object.keys(evData.data).forEach(key => {
+          this.cache.set(key, evData.data[key].rt, evData.data[key].str);
+        })
+      }
+
+      if (Object.keys(evData.data).length) this.emit("data", evData );
+    } catch (ex) {
+      this.emit('error', ex.message);
     }
+  }
 }
