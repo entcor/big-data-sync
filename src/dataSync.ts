@@ -1,6 +1,9 @@
 import { EventEmitter } from "events";
 import { CacheIf } from "./interfaces";
+import TagLogger from 'etaglogger';
 const splitter = '#@%@#';
+
+const logd = TagLogger('BDS');
 
 // realTimeSync: server (set) => send to client (clnt.setFromServer()) => client.onData()
 // при изменени параметра - сервер передаст изменение на клиент
@@ -90,12 +93,16 @@ export default class BDS extends EventEmitter {
   // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
   getSyncState(): BSSyncState {
 
+    logd('bds => getSyncState(start)')
+
     if (this.syncType === 'full') {
       const syncRtList = Object.keys(this.values)
           .reduce((prev, key) => {
               prev[key] = this.values[key].rt;
               return prev;
           }, {} as any);
+
+        logd('bds => getSyncState(finish)', syncRtList.length, syncRtList.slice(0, 7))
 
         return {
             rt: this.syncTime,
@@ -118,6 +125,8 @@ export default class BDS extends EventEmitter {
   getDataForSync(clientData: BSSyncState): string {
     const strItems = [];
 
+    logd('bds => getDataForSync(start)', clientData.data.length, Object.values(clientData.data).slice(0, 7))
+
     if (this.syncType === 'full') {
       Object.keys(this.values)
         .forEach((key) => {
@@ -135,6 +144,9 @@ export default class BDS extends EventEmitter {
           if (this.values[key].rt > clientData.data[key]) // cahnged object
             strItems.push(`${key}${splitter}${this.values[key].str}`);
         });
+
+      logd('bds => getDataForSync(finish)', strItems.length, strItems.slice(0, 4))
+
     } else {
       Object.keys(this.values)
         .forEach((key) => {

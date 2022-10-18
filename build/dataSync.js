@@ -1,7 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
+const etaglogger_1 = __importDefault(require("etaglogger"));
 const splitter = '#@%@#';
+const logd = (0, etaglogger_1.default)('BDS');
 ;
 class BDS extends events_1.EventEmitter {
     constructor(proxyMode, cache) {
@@ -55,12 +60,14 @@ class BDS extends events_1.EventEmitter {
     // метод клиента
     // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
     getSyncState() {
+        logd('bds => getSyncState(start)');
         if (this.syncType === 'full') {
             const syncRtList = Object.keys(this.values)
                 .reduce((prev, key) => {
                 prev[key] = this.values[key].rt;
                 return prev;
             }, {});
+            logd('bds => getSyncState(finish)', syncRtList.length, syncRtList.slice(0, 7));
             return {
                 rt: this.syncTime,
                 data: syncRtList,
@@ -77,6 +84,7 @@ class BDS extends events_1.EventEmitter {
     // принятие рещение о недостающих элементах на основании состоянии клиента
     getDataForSync(clientData) {
         const strItems = [];
+        logd('bds => getDataForSync(start)', clientData.data.length, Object.values(clientData.data).slice(0, 7));
         if (this.syncType === 'full') {
             Object.keys(this.values)
                 .forEach((key) => {
@@ -91,6 +99,7 @@ class BDS extends events_1.EventEmitter {
                 else if (this.values[key].rt > clientData.data[key]) // cahnged object
                     strItems.push(`${key}${splitter}${this.values[key].str}`);
             });
+            logd('bds => getDataForSync(finish)', strItems.length, strItems.slice(0, 4));
         }
         else {
             Object.keys(this.values)
