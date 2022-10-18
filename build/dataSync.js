@@ -124,6 +124,7 @@ class BDS extends events_1.EventEmitter {
     // метод клиента
     // межсерверная синхронизация (bulk - срезовая)
     setSyncItems(strData, bulk) {
+        logd('>>>> setSyncItems', strData, bulk);
         try {
             const items = strData.split(splitter).filter(el => !!el);
             const rt = new Date(items.shift());
