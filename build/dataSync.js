@@ -152,18 +152,17 @@ class BDS extends events_1.EventEmitter {
                     evData.data[key] = { rt, ...data[key] };
                 }
             });
-            if (bulk) { // синхронизация куска данных - надо удалить все старое что не пришло - значит удалено
-                for (const key in this.values) {
-                    console.log("........", key, this.values[key].rt, rt, this.values[key].rt < rt);
-                    if (this.values[key].rt < rt) {
-                        const $val = this.values[key];
-                        delete this.values[key];
-                        this.emit("delete", key, $val.v);
-                        if (this.cache)
-                            this.cache.delete(key);
-                    }
-                }
-            }
+            // if (bulk) { // синхронизация куска данных - надо удалить все старое что не пришло - значит удалено
+            //   for (const key in this.values) {
+            //     console.log("........", key, this.values[key].rt, rt, this.values[key].rt < rt)
+            //     if (this.values[key].rt < rt) {
+            //       const $val = this.values[key];
+            //       delete this.values[key];
+            //       this.emit("delete", key, $val.v );
+            //       if (this.cache) this.cache.delete(key);
+            //     }
+            //   }
+            // }
             if (this.cache) {
                 Object.keys(evData.data).forEach(key => {
                     this.cache.set(key, evData.data[key].rt, evData.data[key].str);
