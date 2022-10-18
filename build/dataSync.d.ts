@@ -16,7 +16,7 @@ export interface DataEvent {
 interface BSSyncState {
     rt: Date;
     data: {
-        [key: string]: boolean;
+        [key: string]: Date;
     };
 }
 export default class BDS extends EventEmitter {
@@ -26,6 +26,7 @@ export default class BDS extends EventEmitter {
         [key: string]: BSValue;
     };
     private syncTime;
+    private syncType;
     constructor(proxyMode: boolean, cache?: CacheIf);
     init(): Promise<void>;
     keys(): string[];

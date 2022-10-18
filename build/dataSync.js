@@ -9,6 +9,7 @@ class BDS extends events_1.EventEmitter {
         this.proxyMode = proxyMode;
         this.cache = cache;
         this.values = {};
+        this.syncType = 'full';
         this.syncTime = new Date(0);
         this.values = {};
     }
@@ -54,27 +55,51 @@ class BDS extends events_1.EventEmitter {
     // метод клиента
     // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
     getSyncState() {
-        const syncRtList = Object.keys(this.values)
-            .reduce((prev, key) => {
-            if (this.values[key].rt > this.syncTime)
-                prev[key] = 1;
-            return prev;
-        }, {});
-        return {
-            rt: this.syncTime,
-            data: syncRtList,
-        };
+        if (this.syncType === 'full') {
+            const syncRtList = Object.keys(this.values)
+                .reduce((prev, key) => {
+                prev[key] = this.values[key].rt;
+                return prev;
+            }, {});
+            return {
+                rt: this.syncTime,
+                data: syncRtList,
+            };
+        }
+        return undefined;
+        // const syncRtList = Object.keys(this.values)
+        //     .reduce((prev, key) => {
+        //         if (this.values[key].rt > this.syncTime) prev[key] = 1;
+        //         return prev;
+        //     }, {} as any);
     }
     // метод сервера
     // принятие рещение о недостающих элементах на основании состоянии клиента
     getDataForSync(clientData) {
         const strItems = [];
-        Object.keys(this.values)
-            .forEach((key) => {
-            if (this.values[key].rt > clientData.rt || !clientData.data[key]) {
-                strItems.push(`${key}${splitter}${this.values[key].str}`);
-            }
-        });
+        if (this.syncType === 'full') {
+            Object.keys(this.values)
+                .forEach((key) => {
+                const srcIdList = Object.keys(this.values);
+                const destIdList = Object.keys(clientData.data);
+                const deletedItems = destIdList.filter(x => !srcIdList.includes(x));
+                deletedItems.forEach(key => {
+                    strItems.push(`${key}${splitter}undefined`);
+                });
+                if (!clientData.data[key]) // new object
+                    strItems.push(`${key}${splitter}${this.values[key].str}`);
+                else if (this.values[key].rt > clientData.data[key]) // cahnged object
+                    strItems.push(`${key}${splitter}${this.values[key].str}`);
+            });
+        }
+        else {
+            Object.keys(this.values)
+                .forEach((key) => {
+                if (this.values[key].rt > clientData.rt || !clientData.data[key]) {
+                    strItems.push(`${key}${splitter}${this.values[key].str}`);
+                }
+            });
+        }
         // rt###key1###value1###key2###value2 ..........
         return `${(new Date()).toISOString()}${splitter}${strItems.join(splitter)}`;
     }
