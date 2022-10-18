@@ -102,7 +102,7 @@ export default class BDS extends EventEmitter {
               return prev;
           }, {} as any);
 
-        logd('bds => getSyncState(finish)', syncRtList.length, syncRtList.slice(0, 7))
+        logd('bds => getSyncState(finish)', syncRtList.length, Object.keys(syncRtList).slice(0, 7))
 
         return {
             rt: this.syncTime,

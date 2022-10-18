@@ -67,7 +67,7 @@ class BDS extends events_1.EventEmitter {
                 prev[key] = this.values[key].rt;
                 return prev;
             }, {});
-            logd('bds => getSyncState(finish)', syncRtList.length, syncRtList.slice(0, 7));
+            logd('bds => getSyncState(finish)', syncRtList.length, Object.keys(syncRtList).slice(0, 7));
             return {
                 rt: this.syncTime,
                 data: syncRtList,
