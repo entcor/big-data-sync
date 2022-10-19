@@ -24,7 +24,7 @@ class RedisCache {
     async restore() {
         logd('bds cache => cache restore');
         const HGETALL = (0, util_1.promisify)(this.redisClient.HGETALL).bind(this.redisClient);
-        const data = await HGETALL(this.nodeId);
+        const data = (await HGETALL(this.nodeId)) || {};
         const res = {};
         Object.keys(data)
             .forEach(key => {

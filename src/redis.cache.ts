@@ -25,7 +25,7 @@ export class RedisCache implements CacheIf {
   async restore(): Promise<{[key: string]: { rt: Date, str: string }}> {
     logd('bds cache => cache restore')
     const HGETALL = promisify(this.redisClient.HGETALL).bind(this.redisClient);
-    const data: { [key:string]: string } = await HGETALL(this.nodeId);
+    const data: { [key:string]: string } = (await HGETALL(this.nodeId)) || {};
     const res = {};
 
     Object.keys(data)
