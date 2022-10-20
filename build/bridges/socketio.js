@@ -7,6 +7,7 @@ class SioBridge {
     }
     startServer(sio) {
         sio.on('connection', (socket) => {
+            console.log('client');
             let client = socket;
             socket.on('disconnect', () => {
                 client = undefined;
@@ -20,6 +21,7 @@ class SioBridge {
                     client.emit(`${this.nodeId}:list:rtdata`, this.bds.pack(new Date(), { [id]: undefined }));
             });
             socket.on(`${this.nodeId}:list:state`, (syncState) => {
+                console.log('data', syncState);
                 const syncData = this.bds.getDataForSync(syncState);
                 socket.emit(`${this.nodeId}:list:syncData`, syncData);
             });

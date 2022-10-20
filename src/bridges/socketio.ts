@@ -8,6 +8,7 @@ export default class SioBridge {
   
   startServer(sio) {
     sio.on('connection', (socket) => {
+      console.log('client')
       let client = socket;
 
       socket.on('disconnect', () => {
@@ -24,6 +25,8 @@ export default class SioBridge {
 
       socket.on(`${this.nodeId}:list:state`,
         (syncState) => {
+          console.log('data', syncState)
+
           const syncData = this.bds.getDataForSync(syncState);
           socket.emit(`${this.nodeId}:list:syncData`, syncData);
         }
