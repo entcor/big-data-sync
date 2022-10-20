@@ -39,10 +39,12 @@ class SioBridge {
             sendSyncState();
         });
         sio_client.on(`${this.nodeId}:list:syncData`, (syncData) => {
+            console.log('12312312312', `${this.nodeId}:list:syncData`);
             this.bds.setSyncItems(syncData, true);
         });
         sio_client.on(`${this.nodeId}:list:rtdata`, //real time data - при изменении параметра
         (rtData) => {
+            console.log('12312312312', `${this.nodeId}:list:rtdata`);
             this.bds.setSyncItems(rtData, false);
         });
         return sendSyncState;
