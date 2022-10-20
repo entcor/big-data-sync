@@ -30,6 +30,7 @@ export default class BDS extends EventEmitter {
     constructor(proxyMode: boolean, cache?: CacheIf);
     init(): Promise<void>;
     keys(): string[];
+    data(): {};
     set(k: string, v: any): void;
     debug(): {
         [key: string]: BSValue;
