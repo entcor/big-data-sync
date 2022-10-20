@@ -23,12 +23,6 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
-"@entcor/big-data-sync@https://github.com/entcor/big-data-sync.git":
-  version "1.0.0"
-  resolved "https://github.com/entcor/big-data-sync.git#8e1d31d4d9d14176afc4a6d07ec8616c70f65688"
-  dependencies:
-    etaglogger entcor/taglogger
-
 "@redis/bloom@1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@redis/bloom/-/bloom-1.0.2.tgz#42b82ec399a92db05e29fffcdfd9235a5fc15cdf"

@@ -31,6 +31,9 @@ class SioBridge {
             const syncState = this.bds.getSyncState(); // читаем у клиента состояние для отправки на сервер
             sio_client.emit(`${this.nodeId}:list:state`, syncState);
         };
+        if (sio_client.connected) {
+            sendSyncState();
+        }
         sio_client.on('connect', () => {
             sendSyncState();
         });
