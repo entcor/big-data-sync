@@ -37,6 +37,7 @@ export default class SioBridge {
 
     const sendSyncState = () =>  {
       const syncState = this.bds.getSyncState(); // читаем у клиента состояние для отправки на сервер
+      console.log('12312312312');
       sio_client.emit(`${this.nodeId}:list:state`, syncState);
     }
 
@@ -58,6 +59,6 @@ export default class SioBridge {
       }
     );
 
-    return this.bds;
+    return sendSyncState;
   }
 }
