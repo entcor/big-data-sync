@@ -8,7 +8,6 @@ export default class SioBridge {
   
   startServer(sio) {
     sio.on('connection', (socket) => {
-      console.log('client')
       let client = socket;
 
       socket.on('disconnect', () => {
@@ -25,8 +24,6 @@ export default class SioBridge {
 
       socket.on(`${this.nodeId}:list:state`,
         (syncState) => {
-          console.log('data', syncState)
-
           const syncData = this.bds.getDataForSync(syncState);
           socket.emit(`${this.nodeId}:list:syncData`, syncData);
         }
@@ -40,7 +37,6 @@ export default class SioBridge {
 
     const sendSyncState = () =>  {
       const syncState = this.bds.getSyncState(); // читаем у клиента состояние для отправки на сервер
-      console.log('12312312312');
       sio_client.emit(`${this.nodeId}:list:state`, syncState);
     }
 
@@ -53,13 +49,11 @@ export default class SioBridge {
     })
 
     sio_client.on(`${this.nodeId}:list:syncData`, (syncData) => {
-      console.log('12312312312', `${this.nodeId}:list:syncData`);
       this.bds.setSyncItems(syncData, true);
     })
 
     sio_client.on(`${this.nodeId}:list:rtdata`,  //real time data - при изменении параметра
     (rtData) => { 
-      console.log('12312312312', `${this.nodeId}:list:rtdata`);
         this.bds.setSyncItems(rtData, false);
       }
     );
