@@ -155,7 +155,10 @@ class BDS extends events_1.EventEmitter {
                 }
                 else {
                     this.values[key] = data[key];
-                    evData.data[key] = { rt, ...data[key] };
+                    // evData.data[key] = { rt, ...data[key] };
+                    const obj = { rt };
+                    Object.keys(data[key]).forEach(key => obj[key] = data[key]);
+                    evData.data[key] = obj;
                 }
             });
             // if (bulk) { // синхронизация куска данных - надо удалить все старое что не пришло - значит удалено
