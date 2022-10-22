@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -18,17 +27,19 @@ class BDS extends events_1.EventEmitter {
         this.syncTime = new Date(0);
         this.values = {};
     }
-    async init() {
-        if (this.cache) {
-            const data = await this.cache.restore();
-            Object.keys(data).forEach(key => {
-                this.values[key] = {
-                    rt: data[key].rt,
-                    v: !this.proxyMode && JSON.parse(data[key].str),
-                    str: data[key].str,
-                };
-            });
-        }
+    init() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.cache) {
+                const data = yield this.cache.restore();
+                Object.keys(data).forEach(key => {
+                    this.values[key] = {
+                        rt: data[key].rt,
+                        v: !this.proxyMode && JSON.parse(data[key].str),
+                        str: data[key].str,
+                    };
+                });
+            }
+        });
     }
     keys() {
         return Object.keys(this.values);
