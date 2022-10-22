@@ -31,6 +31,7 @@ export default class BDS extends EventEmitter {
     init(): Promise<void>;
     keys(): string[];
     data(): {};
+    array(): any[];
     set(k: string, v: any): void;
     debug(): {
         [key: string]: BSValue;

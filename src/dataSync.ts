@@ -68,7 +68,11 @@ export default class BDS extends EventEmitter {
     return Object.keys(this.values).reduce((agg, key) => {
       agg[key] = this.values[key].v;
       return agg;
-    },{});
+    }, {});
+  }
+
+  array() {
+    return Object.values(this.values).map(el => el.v);
   }
 
   set (k: string, v: any) {

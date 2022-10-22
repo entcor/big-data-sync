@@ -50,6 +50,9 @@ class BDS extends events_1.EventEmitter {
             return agg;
         }, {});
     }
+    array() {
+        return Object.values(this.values).map(el => el.v);
+    }
     set(k, v) {
         const str = v === undefined ? undefined : JSON.stringify(v);
         if ((!this.values[k] && !str) || (this.values[k] && str === this.values[k].str))
