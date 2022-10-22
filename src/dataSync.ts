@@ -208,10 +208,7 @@ export default class BDS extends EventEmitter {
           }
         } else {
           this.values[key] = data[key];
-          // evData.data[key] = { rt, ...data[key] };
-          const obj = { rt };
-          Object.keys(data[key]).forEach(key => obj[key] = data[key]);
-          evData.data[key] = obj as BSValue;
+          evData.data[key] = { rt, ...data[key] };
         }
       })
       
