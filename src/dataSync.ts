@@ -208,7 +208,7 @@ export default class BDS extends EventEmitter {
           if ($val) {
             delete this.values[key];
             this.emit("delete", key, $val.v);
-            this.cache.delete(key);
+            if (this.cache) this.cache.delete(key);
           }
         } else {
           this.values[key] = data[key];
