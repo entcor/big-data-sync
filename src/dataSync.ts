@@ -236,6 +236,7 @@ export default class BDS extends EventEmitter {
 
       if (Object.keys(evData.data).length) this.emit("data", evData );
     } catch (ex) {
+      console.log(ex);
       this.emit('error', ex.message);
     }
   }

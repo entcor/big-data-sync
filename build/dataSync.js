@@ -192,6 +192,7 @@ class BDS extends events_1.EventEmitter {
                 this.emit("data", evData);
         }
         catch (ex) {
+            console.log(ex);
             this.emit('error', ex.message);
         }
     }
