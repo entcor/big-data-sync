@@ -30,6 +30,9 @@ class RedisCache {
         logd('bds cache => delete', id);
         return this.redisClient.HDEL(this.nodeId, id);
     }
+    reset() {
+        return this.redisClient.DEL(this.nodeId);
+    }
     restore() {
         return __awaiter(this, void 0, void 0, function* () {
             logd('bds cache => cache restore');

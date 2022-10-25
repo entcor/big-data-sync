@@ -5,6 +5,7 @@ export declare class RedisCache implements CacheIf {
     constructor(nodeId: string, redisClient: any);
     set(id: string, rt: Date, value: string): Promise<void>;
     delete(id: string): any;
+    reset(): any;
     restore(): Promise<{
         [key: string]: {
             rt: Date;

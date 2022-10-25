@@ -22,6 +22,10 @@ export class RedisCache implements CacheIf {
     return this.redisClient.HDEL(this.nodeId, id);
   }
 
+  reset() {
+    return this.redisClient.DEL(this.nodeId);
+  }
+
   async restore(): Promise<{[key: string]: { rt: Date, str: string }}> {
     logd('bds cache => cache restore')
     const HGETALL = promisify(this.redisClient.HGETALL).bind(this.redisClient);
