@@ -58,6 +58,8 @@ export default class SioBridge {
       }
     );
 
+    setTimeout(sendSyncState, 5000);
+
     return sendSyncState;
   }
 }
