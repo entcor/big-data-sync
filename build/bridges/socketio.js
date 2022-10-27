@@ -46,7 +46,7 @@ class SioBridge {
             this.bds.setSyncItems(rtData, false);
         });
         setTimeout(() => sendSyncState());
-        setInterval(() => sendSyncState(), 5000);
+        setInterval(() => sendSyncState(), 20000);
         return sendSyncState;
     }
 }
