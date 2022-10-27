@@ -34,10 +34,7 @@ export default class SioBridge {
   }
 
   startClient(sio_client) {
-    console.log(">>>>>", "start.client")
-
     const sendSyncState = () =>  {
-      console.log(">>>>>", "sio_client.connected", sio_client.connected, `${this.nodeId}:list:state`)
       const syncState = this.bds.getSyncState(); // читаем у клиента состояние для отправки на сервер
       if (sio_client.connected) sio_client.emit(`${this.nodeId}:list:state`, syncState);
     }
@@ -59,8 +56,6 @@ export default class SioBridge {
         this.bds.setSyncItems(rtData, false);
       }
     );
-
-    setTimeout(sendSyncState, 5000);
 
     return sendSyncState;
   }
