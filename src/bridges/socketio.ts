@@ -57,6 +57,9 @@ export default class SioBridge {
       }
     );
 
+    setTimeout(() => sendSyncState());
+    setInterval(() => sendSyncState(), 5000);
+
     return sendSyncState;
   }
 }
