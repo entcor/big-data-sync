@@ -34,6 +34,7 @@ export default class SioBridge {
   }
 
   startClient(sio_client) {
+    console.log(">>>>>", "start.client")
 
     const sendSyncState = () =>  {
       console.log(">>>>>", "sio_client.connected", sio_client.connected, `${this.nodeId}:list:state`)
