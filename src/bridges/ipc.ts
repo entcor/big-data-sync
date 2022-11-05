@@ -3,12 +3,12 @@ import BigKVSync, { DataEvent } from '../dataSync';
 import TagLogger from 'etaglogger';
 const logd = TagLogger('BDS.IPC');
 
-export default class Bridge {
+export default class Bridge<DataType> {
     private ipc: IPC.IPC;
 
     constructor(
       private readonly nodeId: string,
-      private readonly bds: BigKVSync,
+      private readonly bds: BigKVSync<DataType>,
     ) {
       this.ipc = new IPC.IPC();
     }
@@ -43,7 +43,7 @@ export default class Bridge {
       );
       
       this.ipc.server.start();
-      this.bds.on('data', ($d: DataEvent)=> {
+      this.bds.on('data', ($d: DataEvent<DataType>)=> {
         logd('IPC server => data');
         const sendData = this.bds.pack($d.rt, $d.data);
         if (client) this.ipc.server.emit(client, `list:rtdata`, sendData)}

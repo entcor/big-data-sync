@@ -16,14 +16,14 @@ const logd = TagLogger('BDS');
 // сервверр проверить и выберет все параметры, которые имеют время обновления после последнего 
 // времени синхронизации и не входят в присланный клиентом список 
 
-export interface BSValue {
+export interface BSValue<DataType> {
     rt: Date,
-    v: any
+    v: DataType,
     str: string,
 };
 
-export interface DataEvent {
-  data: {[key: string]: BSValue};
+export interface DataEvent<DataType> {
+  data: {[key: string]: BSValue<DataType>};
   rt: Date,
   bulk: boolean,
 }
@@ -33,8 +33,8 @@ interface BSSyncState {
     data: {[key: string]: Date};
 }
 
-export default class BDS extends EventEmitter {
-  values: {[key: string]: BSValue} = {};
+export default class BDS<DataType> extends EventEmitter {
+  values: {[key: string]: BSValue<DataType>} = {};
   private syncTime: Date;
   private syncType = 'full';
 
@@ -47,7 +47,7 @@ export default class BDS extends EventEmitter {
     this.values = {};
   }
 
-  async init() {
+  async init(): Promise<void> {
     if (this.cache) {
       const data = await this.cache.restore();
       Object.keys(data).forEach(key => {
@@ -64,18 +64,18 @@ export default class BDS extends EventEmitter {
     return Object.keys(this.values);
   }
 
-  data() {
+  data(): {[key: string]: BSValue<DataType>} {
     return Object.keys(this.values).reduce((agg, key) => {
       agg[key] = this.values[key].v;
       return agg;
     }, {});
   }
 
-  array() {
+  array(): DataType[] {
     return Object.values(this.values).map(el => el.v);
   }
 
-  set (k: string, v: any) {
+  set (k: string, v: DataType): void {
     const str = v === undefined ? undefined : JSON.stringify(v);
     if ((!this.values[k] && !str) || ( this.values[k] && str === this.values[k].str)) return; // object is not changed
 
@@ -93,7 +93,11 @@ export default class BDS extends EventEmitter {
       data: {[k]: { str, v } || null},
       rt: now,
       bulk: false,
-    } as DataEvent);
+    } as DataEvent<DataType>);
+  }
+
+  get (id): DataType {
+    return this.values[id]?.v;
   }
 
   debug() {
@@ -171,7 +175,7 @@ export default class BDS extends EventEmitter {
     return `${(new Date()).toISOString()}${splitter}${strItems.join(splitter)}`;
   }
 
-  public pack(rt: Date, data: {[key: string]: BSValue}) {
+  public pack(rt: Date, data: {[key: string]: BSValue<DataType>}) {
     const strItems = [];
     Object.keys(data || {}).forEach(key => {
       const $str = data[key]?.str;
@@ -200,7 +204,7 @@ export default class BDS extends EventEmitter {
 
       if (bulk) this.syncTime = rt;
 
-      const evData: DataEvent = { data: {}, rt, bulk };
+      const evData: DataEvent<DataType> = { data: {}, rt, bulk };
       Object.keys(data).forEach(key => {
         if (data[key] === null) {
           const $val = this.values[key];

@@ -1,9 +1,9 @@
 import BigKVSync, { DataEvent } from "../dataSync";
 
-export default class SioBridge {
+export default class SioBridge<DataType> {
   constructor(
       private readonly nodeId: string,
-      private readonly bds: BigKVSync,
+      private readonly bds: BigKVSync<DataType>,
     ) {}
   
   startServer(sio) {
@@ -14,7 +14,7 @@ export default class SioBridge {
         client = undefined;
       });
 
-      this.bds.on('data', ($d: DataEvent)=> {
+      this.bds.on('data', ($d: DataEvent<DataType>)=> {
         if (client) client.emit(`${this.nodeId}:list:rtdata`, this.bds.pack($d.rt, $d.data) )}
       );
 
@@ -34,10 +34,7 @@ export default class SioBridge {
   }
 
   startClient(sio_client) {
-    console.log(">>>>>>>>>>>>>>>>>>>>>>111")
-
     const sendSyncState = () =>  {
-      console.log(">>>>>>>>>>>>>>>>>>>>>>", sio_client.connected)
       const syncState = this.bds.getSyncState(); // читаем у клиента состояние для отправки на сервер
       if (sio_client.connected) sio_client.emit(`${this.nodeId}:list:state`, syncState);
     }

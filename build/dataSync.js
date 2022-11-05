@@ -74,6 +74,10 @@ class BDS extends events_1.EventEmitter {
             bulk: false,
         });
     }
+    get(id) {
+        var _a;
+        return (_a = this.values[id]) === null || _a === void 0 ? void 0 : _a.v;
+    }
     debug() {
         return this.values;
     }
