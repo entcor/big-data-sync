@@ -35,7 +35,7 @@ interface BSSyncState {
 }
 
 export default class BDS<DataType> extends EventEmitter {
-  values: {[key: string]: BSValue<DataType>} = {};
+  private $values: {[key: string]: BSValue<DataType>} = {};
   private syncTime: Date;
   private syncType = 'full';
 
@@ -46,7 +46,7 @@ export default class BDS<DataType> extends EventEmitter {
   ) {
     super();
     this.syncTime = new Date(0);
-    this.values = {};
+    this.$values = {};
 
     if (this.ttlCheckInterval) {
       setInterval (() => this.checkTTL(), ttlCheckInterval * 1000);
@@ -55,10 +55,10 @@ export default class BDS<DataType> extends EventEmitter {
 
   checkTTL() {
     const now = new Date();
-    Object.keys(this.values).forEach((key: string) => {
-      const $data = this.values[key];
+    Object.keys(this.$values).forEach((key: string) => {
+      const $data = this.$values[key];
       if ($data.expire && $data.expire > now) {
-        delete this.values[key];
+        delete this.$values[key];
         if (this.cache) this.cache.delete(key); 
       }
     })
@@ -68,7 +68,7 @@ export default class BDS<DataType> extends EventEmitter {
     if (this.cache) {
       const data = await this.cache.restore();
       Object.keys(data).forEach(key => {
-        this.values[key] = {
+        this.$values[key] = {
           rt: data[key].rt,
           v: !this.proxyMode && JSON.parse(data[key].str),
           str: data[key].str,
@@ -79,29 +79,33 @@ export default class BDS<DataType> extends EventEmitter {
   }
 
   keys(): string[] {
-    return Object.keys(this.values);
+    return Object.keys(this.$values);
   }
 
   data(): {[key: string]: BSValue<DataType>} {
-    return Object.keys(this.values).reduce((agg, key) => {
-      agg[key] = this.values[key].v;
+    return Object.keys(this.$values).reduce((agg, key) => {
+      agg[key] = this.$values[key].v;
       return agg;
     }, {});
   }
 
   array(): DataType[] {
-    return Object.values(this.values).map(el => el.v);
+    return Object.values(this.$values).map(el => el.v);
+  }
+
+  values(): {[key: string]: DataType} {
+    return Object.keys(this.$values).reduce((acc, key) => { acc[key] = this.$values[key].v; return acc; }, {});
   }
 
   set (k: string, v: DataType, ttl?: number): void {
     const str = v === undefined ? undefined : JSON.stringify(v);
-    if ((!this.values[k] && !str) || ( this.values[k] && str === this.values[k].str)) return; // object is not changed
+    if ((!this.$values[k] && !str) || ( this.$values[k] && str === this.$values[k].str)) return; // object is not changed
 
     const now = new Date();
-    this.values[k] = { rt: now, v, str, expire: new Date((new Date).getTime() + ttl * 1000) };
+    this.$values[k] = { rt: now, v, str, expire: new Date((new Date).getTime() + ttl * 1000) };
     if (!v) {
-      this.emit("delete", k, this.values[k]);
-      delete this.values[k];
+      this.emit("delete", k, this.$values[k]);
+      delete this.$values[k];
       if (this.cache) this.cache.delete(k);
       return;
     }
@@ -115,11 +119,11 @@ export default class BDS<DataType> extends EventEmitter {
   }
 
   get (id: string): DataType {
-    return this.values[id]?.v;
+    return this.$values[id]?.v;
   }
 
   debug() {
-    return this.values;
+    return this.$values;
   }
 
   // метод клиента
@@ -129,9 +133,9 @@ export default class BDS<DataType> extends EventEmitter {
     logd('bds => getSyncState(start)')
 
     if (this.syncType === 'full') {
-      const syncRtList = Object.keys(this.values)
+      const syncRtList = Object.keys(this.$values)
           .reduce((prev, key) => {
-              prev[key] = this.values[key].rt;
+              prev[key] = this.$values[key].rt;
               return prev;
           }, {} as any);
 
@@ -161,9 +165,9 @@ export default class BDS<DataType> extends EventEmitter {
     logd('bds => getDataForSync(start)', clientData.data.length, Object.values(clientData.data).slice(0, 7))
 
     if (this.syncType === 'full') {
-      Object.keys(this.values)
+      Object.keys(this.$values)
         .forEach((key) => {
-          const srcIdList = Object.keys(this.values);
+          const srcIdList = Object.keys(this.$values);
           const destIdList = Object.keys(clientData.data);
 
           const deletedItems = destIdList.filter(x => !srcIdList.includes(x));
@@ -172,19 +176,19 @@ export default class BDS<DataType> extends EventEmitter {
           })
 
           if (!clientData.data[key]) // new object
-            strItems.push(`${key}${splitter}${this.values[key].str}`);
+            strItems.push(`${key}${splitter}${this.$values[key].str}`);
           else 
-          if (this.values[key].rt > clientData.data[key]) // cahnged object
-            strItems.push(`${key}${splitter}${this.values[key].str}`);
+          if (this.$values[key].rt > clientData.data[key]) // cahnged object
+            strItems.push(`${key}${splitter}${this.$values[key].str}`);
         });
 
       logd('bds => getDataForSync(finish)', strItems.length, strItems.slice(0, 4))
 
     } else {
-      Object.keys(this.values)
+      Object.keys(this.$values)
         .forEach((key) => {
-          if (this.values[key].rt > clientData.rt || !clientData.data[key]) {
-            strItems.push(`${key}${splitter}${this.values[key].str}`);
+          if (this.$values[key].rt > clientData.rt || !clientData.data[key]) {
+            strItems.push(`${key}${splitter}${this.$values[key].str}`);
           }
         });  
     }
@@ -225,15 +229,15 @@ export default class BDS<DataType> extends EventEmitter {
       const evData: DataEvent<DataType> = { data: {}, rt, bulk };
       Object.keys(data).forEach(key => {
         if (data[key] === null) {
-          const $val = this.values[key];
+          const $val = this.$values[key];
 
           if ($val) {
-            delete this.values[key];
+            delete this.$values[key];
             this.emit("delete", key, $val.v);
             if (this.cache) this.cache.delete(key);
           }
         } else {
-          this.values[key] = data[key];
+          this.$values[key] = data[key];
           evData.data[key] = { rt, ...data[key] };
         }
       })

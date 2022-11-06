@@ -24,9 +24,7 @@ export default class BDS<DataType> extends EventEmitter {
     private readonly proxyMode;
     private readonly cache?;
     private readonly ttlCheckInterval;
-    values: {
-        [key: string]: BSValue<DataType>;
-    };
+    private $values;
     private syncTime;
     private syncType;
     constructor(proxyMode: boolean, cache?: CacheIf, ttlCheckInterval?: number);
@@ -37,6 +35,9 @@ export default class BDS<DataType> extends EventEmitter {
         [key: string]: BSValue<DataType>;
     };
     array(): DataType[];
+    values(): {
+        [key: string]: DataType;
+    };
     set(k: string, v: DataType, ttl?: number): void;
     get(id: string): DataType;
     debug(): {

@@ -23,20 +23,20 @@ class BDS extends events_1.EventEmitter {
         this.proxyMode = proxyMode;
         this.cache = cache;
         this.ttlCheckInterval = ttlCheckInterval;
-        this.values = {};
+        this.$values = {};
         this.syncType = 'full';
         this.syncTime = new Date(0);
-        this.values = {};
+        this.$values = {};
         if (this.ttlCheckInterval) {
             setInterval(() => this.checkTTL(), ttlCheckInterval * 1000);
         }
     }
     checkTTL() {
         const now = new Date();
-        Object.keys(this.values).forEach((key) => {
-            const $data = this.values[key];
+        Object.keys(this.$values).forEach((key) => {
+            const $data = this.$values[key];
             if ($data.expire && $data.expire > now) {
-                delete this.values[key];
+                delete this.$values[key];
                 if (this.cache)
                     this.cache.delete(key);
             }
@@ -47,7 +47,7 @@ class BDS extends events_1.EventEmitter {
             if (this.cache) {
                 const data = yield this.cache.restore();
                 Object.keys(data).forEach(key => {
-                    this.values[key] = {
+                    this.$values[key] = {
                         rt: data[key].rt,
                         v: !this.proxyMode && JSON.parse(data[key].str),
                         str: data[key].str,
@@ -58,26 +58,29 @@ class BDS extends events_1.EventEmitter {
         });
     }
     keys() {
-        return Object.keys(this.values);
+        return Object.keys(this.$values);
     }
     data() {
-        return Object.keys(this.values).reduce((agg, key) => {
-            agg[key] = this.values[key].v;
+        return Object.keys(this.$values).reduce((agg, key) => {
+            agg[key] = this.$values[key].v;
             return agg;
         }, {});
     }
     array() {
-        return Object.values(this.values).map(el => el.v);
+        return Object.values(this.$values).map(el => el.v);
+    }
+    values() {
+        return Object.keys(this.$values).reduce((acc, key) => { acc[key] = this.$values[key].v; return acc; }, {});
     }
     set(k, v, ttl) {
         const str = v === undefined ? undefined : JSON.stringify(v);
-        if ((!this.values[k] && !str) || (this.values[k] && str === this.values[k].str))
+        if ((!this.$values[k] && !str) || (this.$values[k] && str === this.$values[k].str))
             return; // object is not changed
         const now = new Date();
-        this.values[k] = { rt: now, v, str, expire: new Date((new Date).getTime() + ttl * 1000) };
+        this.$values[k] = { rt: now, v, str, expire: new Date((new Date).getTime() + ttl * 1000) };
         if (!v) {
-            this.emit("delete", k, this.values[k]);
-            delete this.values[k];
+            this.emit("delete", k, this.$values[k]);
+            delete this.$values[k];
             if (this.cache)
                 this.cache.delete(k);
             return;
@@ -92,19 +95,19 @@ class BDS extends events_1.EventEmitter {
     }
     get(id) {
         var _a;
-        return (_a = this.values[id]) === null || _a === void 0 ? void 0 : _a.v;
+        return (_a = this.$values[id]) === null || _a === void 0 ? void 0 : _a.v;
     }
     debug() {
-        return this.values;
+        return this.$values;
     }
     // метод клиента
     // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
     getSyncState() {
         logd('bds => getSyncState(start)');
         if (this.syncType === 'full') {
-            const syncRtList = Object.keys(this.values)
+            const syncRtList = Object.keys(this.$values)
                 .reduce((prev, key) => {
-                prev[key] = this.values[key].rt;
+                prev[key] = this.$values[key].rt;
                 return prev;
             }, {});
             logd('bds => getSyncState(finish)', syncRtList.length, Object.keys(syncRtList).slice(0, 7));
@@ -126,26 +129,26 @@ class BDS extends events_1.EventEmitter {
         const strItems = [];
         logd('bds => getDataForSync(start)', clientData.data.length, Object.values(clientData.data).slice(0, 7));
         if (this.syncType === 'full') {
-            Object.keys(this.values)
+            Object.keys(this.$values)
                 .forEach((key) => {
-                const srcIdList = Object.keys(this.values);
+                const srcIdList = Object.keys(this.$values);
                 const destIdList = Object.keys(clientData.data);
                 const deletedItems = destIdList.filter(x => !srcIdList.includes(x));
                 deletedItems.forEach(key => {
                     strItems.push(`${key}${splitter}undefined`);
                 });
                 if (!clientData.data[key]) // new object
-                    strItems.push(`${key}${splitter}${this.values[key].str}`);
-                else if (this.values[key].rt > clientData.data[key]) // cahnged object
-                    strItems.push(`${key}${splitter}${this.values[key].str}`);
+                    strItems.push(`${key}${splitter}${this.$values[key].str}`);
+                else if (this.$values[key].rt > clientData.data[key]) // cahnged object
+                    strItems.push(`${key}${splitter}${this.$values[key].str}`);
             });
             logd('bds => getDataForSync(finish)', strItems.length, strItems.slice(0, 4));
         }
         else {
-            Object.keys(this.values)
+            Object.keys(this.$values)
                 .forEach((key) => {
-                if (this.values[key].rt > clientData.rt || !clientData.data[key]) {
-                    strItems.push(`${key}${splitter}${this.values[key].str}`);
+                if (this.$values[key].rt > clientData.rt || !clientData.data[key]) {
+                    strItems.push(`${key}${splitter}${this.$values[key].str}`);
                 }
             });
         }
@@ -180,16 +183,16 @@ class BDS extends events_1.EventEmitter {
             const evData = { data: {}, rt, bulk };
             Object.keys(data).forEach(key => {
                 if (data[key] === null) {
-                    const $val = this.values[key];
+                    const $val = this.$values[key];
                     if ($val) {
-                        delete this.values[key];
+                        delete this.$values[key];
                         this.emit("delete", key, $val.v);
                         if (this.cache)
                             this.cache.delete(key);
                     }
                 }
                 else {
-                    this.values[key] = data[key];
+                    this.$values[key] = data[key];
                     evData.data[key] = Object.assign({ rt }, data[key]);
                 }
             });
