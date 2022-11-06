@@ -5,6 +5,7 @@ export interface BSValue<DataType> {
     rt: Date;
     v: DataType;
     str: string;
+    expire: Date;
 }
 export interface DataEvent<DataType> {
     data: {
@@ -22,20 +23,22 @@ interface BSSyncState {
 export default class BDS<DataType> extends EventEmitter {
     private readonly proxyMode;
     private readonly cache?;
+    private readonly ttlCheckInterval;
     values: {
         [key: string]: BSValue<DataType>;
     };
     private syncTime;
     private syncType;
-    constructor(proxyMode: boolean, cache?: CacheIf);
+    constructor(proxyMode: boolean, cache?: CacheIf, ttlCheckInterval?: number);
+    checkTTL(): void;
     init(): Promise<void>;
     keys(): string[];
     data(): {
         [key: string]: BSValue<DataType>;
     };
     array(): DataType[];
-    set(k: string, v: DataType): void;
-    get(id: any): DataType;
+    set(k: string, v: DataType, ttl?: number): void;
+    get(id: string): DataType;
     debug(): {
         [key: string]: BSValue<DataType>;
     };

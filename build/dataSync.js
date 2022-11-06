@@ -18,14 +18,29 @@ const splitter = '#@%@#';
 const logd = (0, etaglogger_1.default)('BDS');
 ;
 class BDS extends events_1.EventEmitter {
-    constructor(proxyMode, cache) {
+    constructor(proxyMode, cache, ttlCheckInterval = 0) {
         super();
         this.proxyMode = proxyMode;
         this.cache = cache;
+        this.ttlCheckInterval = ttlCheckInterval;
         this.values = {};
         this.syncType = 'full';
         this.syncTime = new Date(0);
         this.values = {};
+        if (this.ttlCheckInterval) {
+            setInterval(() => this.checkTTL(), ttlCheckInterval * 1000);
+        }
+    }
+    checkTTL() {
+        const now = new Date();
+        Object.keys(this.values).forEach((key) => {
+            const $data = this.values[key];
+            if ($data.expire && $data.expire > now) {
+                delete this.values[key];
+                if (this.cache)
+                    this.cache.delete(key);
+            }
+        });
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -36,6 +51,7 @@ class BDS extends events_1.EventEmitter {
                         rt: data[key].rt,
                         v: !this.proxyMode && JSON.parse(data[key].str),
                         str: data[key].str,
+                        expire: data[key].expire,
                     };
                 });
             }
@@ -53,12 +69,12 @@ class BDS extends events_1.EventEmitter {
     array() {
         return Object.values(this.values).map(el => el.v);
     }
-    set(k, v) {
+    set(k, v, ttl) {
         const str = v === undefined ? undefined : JSON.stringify(v);
         if ((!this.values[k] && !str) || (this.values[k] && str === this.values[k].str))
             return; // object is not changed
         const now = new Date();
-        this.values[k] = { rt: now, v, str };
+        this.values[k] = { rt: now, v, str, expire: new Date((new Date).getTime() + ttl * 1000) };
         if (!v) {
             this.emit("delete", k, this.values[k]);
             delete this.values[k];

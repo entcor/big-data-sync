@@ -22,9 +22,9 @@ class RedisCache {
         this.nodeId = nodeId;
         this.redisClient = redisClient;
     }
-    set(id, rt, value) {
+    set(id, rt, value, expire) {
         logd('bds cache => set', id);
-        return this.redisClient.HSET(this.nodeId, id, `${rt.toString()}${splitter}${value}`);
+        return this.redisClient.HSET(this.nodeId, id, `${rt.toString()}${splitter}${value}${splitter}${expire && expire.getTime()}`);
     }
     delete(id) {
         logd('bds cache => delete', id);
@@ -42,9 +42,9 @@ class RedisCache {
             Object.keys(data)
                 .forEach(key => {
                 const rec = data[key];
-                const [rtstr, str] = rec.split(splitter);
+                const [rtstr, str, expire] = rec.split(splitter);
                 try {
-                    res[key] = { rt: new Date(rtstr), str };
+                    res[key] = { rt: new Date(rtstr), str, expire: new Date(expire) };
                 }
                 catch (ex) { }
             });

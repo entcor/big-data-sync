@@ -12,9 +12,9 @@ export class RedisCache implements CacheIf {
     private readonly redisClient,
   ) {}
 
-  set(id: string, rt: Date, value: string): Promise<void> {
+  set(id: string, rt: Date, value: string, expire?: Date): Promise<void> {
     logd('bds cache => set', id)
-    return this.redisClient.HSET(this.nodeId, id, `${rt.toString()}${splitter}${value}`);
+    return this.redisClient.HSET(this.nodeId, id, `${rt.toString()}${splitter}${value}${splitter}${expire && expire.getTime()}`);
   }
 
   delete(id: string) {
@@ -35,8 +35,8 @@ export class RedisCache implements CacheIf {
     Object.keys(data)
       .forEach(key => {
         const rec = data[key];
-        const [rtstr, str] = rec.split(splitter);
-        try { res[key] = { rt: new Date(rtstr), str }; } 
+        const [rtstr, str, expire] = rec.split(splitter);
+        try { res[key] = { rt: new Date(rtstr), str, expire: new Date(expire) }; } 
         catch (ex) { }
       })
 

@@ -20,6 +20,7 @@ export interface BSValue<DataType> {
     rt: Date,
     v: DataType,
     str: string,
+    expire: Date,
 };
 
 export interface DataEvent<DataType> {
@@ -41,10 +42,26 @@ export default class BDS<DataType> extends EventEmitter {
   constructor(
     private readonly proxyMode: boolean,
     private readonly cache?: CacheIf,
+    private readonly ttlCheckInterval: number = 0,
   ) {
     super();
     this.syncTime = new Date(0);
     this.values = {};
+
+    if (this.ttlCheckInterval) {
+      setInterval (() => this.checkTTL(), ttlCheckInterval * 1000);
+    }
+  }
+
+  checkTTL() {
+    const now = new Date();
+    Object.keys(this.values).forEach((key: string) => {
+      const $data = this.values[key];
+      if ($data.expire && $data.expire > now) {
+        delete this.values[key];
+        if (this.cache) this.cache.delete(key); 
+      }
+    })
   }
 
   async init(): Promise<void> {
@@ -55,6 +72,7 @@ export default class BDS<DataType> extends EventEmitter {
           rt: data[key].rt,
           v: !this.proxyMode && JSON.parse(data[key].str),
           str: data[key].str,
+          expire: data[key].expire,
         };
       })
     }
@@ -75,12 +93,12 @@ export default class BDS<DataType> extends EventEmitter {
     return Object.values(this.values).map(el => el.v);
   }
 
-  set (k: string, v: DataType): void {
+  set (k: string, v: DataType, ttl?: number): void {
     const str = v === undefined ? undefined : JSON.stringify(v);
     if ((!this.values[k] && !str) || ( this.values[k] && str === this.values[k].str)) return; // object is not changed
 
     const now = new Date();
-    this.values[k] = {rt: now, v, str};
+    this.values[k] = { rt: now, v, str, expire: new Date((new Date).getTime() + ttl * 1000) };
     if (!v) {
       this.emit("delete", k, this.values[k]);
       delete this.values[k];
@@ -96,7 +114,7 @@ export default class BDS<DataType> extends EventEmitter {
     } as DataEvent<DataType>);
   }
 
-  get (id): DataType {
+  get (id: string): DataType {
     return this.values[id]?.v;
   }
 
