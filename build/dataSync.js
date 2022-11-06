@@ -93,6 +93,9 @@ class BDS extends events_1.EventEmitter {
             bulk: false,
         });
     }
+    setBulk(data, ttl) {
+        Object.keys(data).forEach(key => this.set(key, data[key], ttl));
+    }
     get(id) {
         var _a;
         return (_a = this.$values[id]) === null || _a === void 0 ? void 0 : _a.v;

@@ -118,6 +118,10 @@ export default class BDS<DataType> extends EventEmitter {
     } as DataEvent<DataType>);
   }
 
+  setBulk(data: {[key:string]: DataType}, ttl: number): void {
+    Object.keys(data).forEach(key => this.set(key, data[key], ttl));
+  }
+
   get (id: string): DataType {
     return this.$values[id]?.v;
   }

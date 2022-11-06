@@ -39,6 +39,9 @@ export default class BDS<DataType> extends EventEmitter {
         [key: string]: DataType;
     };
     set(k: string, v: DataType, ttl?: number): void;
+    setBulk(data: {
+        [key: string]: DataType;
+    }, ttl: number): void;
     get(id: string): DataType;
     debug(): {
         [key: string]: BSValue<DataType>;
