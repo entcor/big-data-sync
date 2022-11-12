@@ -142,8 +142,10 @@ class BDS extends events_1.EventEmitter {
                 });
                 if (!clientData.data[key]) // new object
                     strItems.push(`${key}${splitter}${this.$values[key].str}`);
-                else if (this.$values[key].rt > clientData.data[key]) // cahnged object
+                else if (this.$values[key].rt > clientData.data[key]) { // cahnged object
+                    console.log('this.$values[key].rt', this.$values[key].rt, 'clientData.data[key]', clientData.data[key]);
                     strItems.push(`${key}${splitter}${this.$values[key].str}`);
+                }
             });
             logd('bds => getDataForSync(finish)', strItems.length, strItems.slice(0, 4));
         }
