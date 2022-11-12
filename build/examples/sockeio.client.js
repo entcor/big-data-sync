@@ -9,8 +9,10 @@ const socketio_1 = __importDefault(require("../bridges/socketio"));
 function init() {
     const sio_client = (0, socket_io_client_1.io)("ws://127.0.0.1:3000", {});
     const bds = new dataSync_1.default(false);
-    bds.on('data', () => console.log('create', bds.debug()));
-    bds.on('delete', () => console.log('delete', bds.debug()));
+    bds.on('data', (data) => {
+        console.log('create', data.bulk, Object.keys(data.data).length);
+    });
+    // bds.on('delete', () => console.log('delete', bds.debug()))
     new socketio_1.default('measures', bds).startClient(sio_client);
 }
 init();

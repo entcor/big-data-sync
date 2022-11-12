@@ -22,7 +22,8 @@ class Bridge {
             this.ipc.server.on(`list:state`, (syncState, socket) => {
                 client = socket;
                 const syncData = this.bds.getDataForSync(syncState);
-                this.ipc.server.emit(socket, `list:syncData`, syncData);
+                if (syncData)
+                    this.ipc.server.emit(socket, `list:syncData`, syncData);
             });
             this.ipc.server.on('connect', () => logd('ipc server => connected'));
             this.ipc.server.on('disconnect', () => logd('ipc server => disconnected'));
@@ -72,6 +73,7 @@ class Bridge {
                 this.bds.setSyncItems(rtData, false);
             });
         });
+        setInterval(sendSyncState, 60 * 1000);
         return this.bds;
     }
 }

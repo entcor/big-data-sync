@@ -6,8 +6,10 @@ function init() {
     const sio_client = io("ws://127.0.0.1:3000", {});
 
     const bds = new BDS(false);
-    bds.on('data', () => console.log('create', bds.debug()))
-    bds.on('delete', () => console.log('delete', bds.debug()))
+    bds.on('data', (data) => {
+        console.log('create', data.bulk, Object.keys(data.data).length);
+    })
+    // bds.on('delete', () => console.log('delete', bds.debug()))
     new bdsSioBridge('measures', bds).startClient(sio_client);
 }
 

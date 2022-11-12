@@ -142,8 +142,7 @@ class BDS extends events_1.EventEmitter {
                 });
                 if (!clientData.data[key]) // new object
                     strItems.push(`${key}${splitter}${this.$values[key].str}`);
-                else if (this.$values[key].rt > clientData.data[key]) { // cahnged object
-                    console.log('this.$values[key].rt', this.$values[key].rt, 'clientData.data[key]', clientData.data[key]);
+                else if (this.$values[key].rt > new Date(clientData.data[key])) { // cahnged object
                     strItems.push(`${key}${splitter}${this.$values[key].str}`);
                 }
             });
@@ -158,6 +157,8 @@ class BDS extends events_1.EventEmitter {
             });
         }
         // rt###key1###value1###key2###value2 ..........
+        if (!strItems.length)
+            return undefined;
         return `${(new Date()).toISOString()}${splitter}${strItems.join(splitter)}`;
     }
     pack(rt, data) {
@@ -181,6 +182,7 @@ class BDS extends events_1.EventEmitter {
                 data[items[i]] = items[i + 1] === 'undefined' ? null : {
                     str: items[i + 1],
                     v: this.proxyMode ? undefined : JSON.parse(items[i + 1]),
+                    rt,
                 };
             }
             if (bulk)

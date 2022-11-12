@@ -144,7 +144,7 @@ export default class BDS<DataType> extends EventEmitter {
           }, {} as any);
 
         logd('bds => getSyncState(finish)', syncRtList.length, Object.keys(syncRtList).slice(0, 7))
-
+        
         return {
             rt: this.syncTime,
             data: syncRtList,
@@ -182,8 +182,7 @@ export default class BDS<DataType> extends EventEmitter {
           if (!clientData.data[key]) // new object
             strItems.push(`${key}${splitter}${this.$values[key].str}`);
           else 
-          if (this.$values[key].rt > clientData.data[key]) { // cahnged object
-            console.log('this.$values[key].rt', this.$values[key].rt, 'clientData.data[key]', clientData.data[key]);
+          if (this.$values[key].rt > new Date(clientData.data[key])) { // cahnged object
             strItems.push(`${key}${splitter}${this.$values[key].str}`);
           }
         });
@@ -200,6 +199,7 @@ export default class BDS<DataType> extends EventEmitter {
     }
 
     // rt###key1###value1###key2###value2 ..........
+    if (!strItems.length) return undefined;
     return `${(new Date()).toISOString()}${splitter}${strItems.join(splitter)}`;
   }
 
@@ -227,6 +227,7 @@ export default class BDS<DataType> extends EventEmitter {
         data[items[i]] = items[i+1] === 'undefined' ? null : {
           str: items[i+1],
           v: this.proxyMode ? undefined : JSON.parse(items[i+1]),
+          rt,
         }
       }
 

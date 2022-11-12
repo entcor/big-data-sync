@@ -28,7 +28,7 @@ export default class Bridge<DataType> {
               (syncState, socket) => {
                   client = socket;
                   const syncData = this.bds.getDataForSync(syncState);
-                  this.ipc.server.emit(socket, `list:syncData`, syncData);
+                  if (syncData) this.ipc.server.emit(socket, `list:syncData`, syncData);
               }
           );
           this.ipc.server.on('connect', () => logd('ipc server => connected'));
@@ -100,6 +100,8 @@ export default class Bridge<DataType> {
               );
           }
       );
+
+        setInterval(sendSyncState, 60 * 1000);
 
       return this.bds;
     }

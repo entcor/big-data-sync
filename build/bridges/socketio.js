@@ -21,7 +21,8 @@ class SioBridge {
             });
             socket.on(`${this.nodeId}:list:state`, (syncState) => {
                 const syncData = this.bds.getDataForSync(syncState);
-                socket.emit(`${this.nodeId}:list:syncData`, syncData);
+                if (syncData)
+                    socket.emit(`${this.nodeId}:list:syncData`, syncData);
             });
         });
         return this.bds;
@@ -46,7 +47,7 @@ class SioBridge {
             this.bds.setSyncItems(rtData, false);
         });
         setTimeout(() => sendSyncState());
-        setInterval(() => sendSyncState(), 20000);
+        setInterval(() => sendSyncState(), 60 * 1000);
         return sendSyncState;
     }
 }
