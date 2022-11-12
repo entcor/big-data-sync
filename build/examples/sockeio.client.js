@@ -8,7 +8,7 @@ const dataSync_1 = __importDefault(require("../dataSync"));
 const socketio_1 = __importDefault(require("../bridges/socketio"));
 function init() {
     const sio_client = (0, socket_io_client_1.io)("ws://127.0.0.1:3000", {});
-    const bds = new dataSync_1.default(false);
+    const bds = new dataSync_1.default('client');
     bds.on('data', (data) => {
         console.log('create', data.bulk, Object.keys(data.data).length);
     });

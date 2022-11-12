@@ -18,9 +18,9 @@ const splitter = '#@%@#';
 const logd = (0, etaglogger_1.default)('BDS');
 ;
 class BDS extends events_1.EventEmitter {
-    constructor(proxyMode, cache, ttlCheckInterval = 0) {
+    constructor(mode = 'server', cache, ttlCheckInterval = 0) {
         super();
-        this.proxyMode = proxyMode;
+        this.mode = mode;
         this.cache = cache;
         this.ttlCheckInterval = ttlCheckInterval;
         this.$values = {};
@@ -49,8 +49,8 @@ class BDS extends events_1.EventEmitter {
                 Object.keys(data).forEach(key => {
                     this.$values[key] = {
                         rt: data[key].rt,
-                        v: !this.proxyMode && JSON.parse(data[key].str),
-                        str: data[key].str,
+                        v: this.mode !== 'proxy' && JSON.parse(data[key].str),
+                        str: this.mode !== 'client' && data[key].str,
                         expire: data[key].expire,
                     };
                 });
@@ -180,8 +180,8 @@ class BDS extends events_1.EventEmitter {
             const data = {};
             for (let i = 0; i < items.length; i += 2) {
                 data[items[i]] = items[i + 1] === 'undefined' ? null : {
-                    str: items[i + 1],
-                    v: this.proxyMode ? undefined : JSON.parse(items[i + 1]),
+                    str: this.mode !== 'client' && items[i + 1],
+                    v: this.mode === 'proxy' ? undefined : JSON.parse(items[i + 1]),
                     rt,
                 };
             }

@@ -40,7 +40,7 @@ export default class BDS<DataType> extends EventEmitter {
   private syncType = 'full';
 
   constructor(
-    private readonly proxyMode: boolean,
+    private readonly mode: 'client' | 'server' | 'proxy' = 'server',
     private readonly cache?: CacheIf,
     private readonly ttlCheckInterval: number = 0,
   ) {
@@ -70,8 +70,8 @@ export default class BDS<DataType> extends EventEmitter {
       Object.keys(data).forEach(key => {
         this.$values[key] = {
           rt: data[key].rt,
-          v: !this.proxyMode && JSON.parse(data[key].str),
-          str: data[key].str,
+          v: this.mode !== 'proxy' && JSON.parse(data[key].str),
+          str: this.mode !== 'client' && data[key].str,
           expire: data[key].expire,
         };
       })
@@ -225,8 +225,8 @@ export default class BDS<DataType> extends EventEmitter {
       const data = {};
       for (let i=0; i < items.length; i += 2) {
         data[items[i]] = items[i+1] === 'undefined' ? null : {
-          str: items[i+1],
-          v: this.proxyMode ? undefined : JSON.parse(items[i+1]),
+          str: this.mode !== 'client' && items[i+1],
+          v: this.mode === 'proxy' ? undefined : JSON.parse(items[i+1]),
           rt,
         }
       }

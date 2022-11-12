@@ -22,7 +22,7 @@ async function init() {
     const redisCache = new RedisCache('proxy.measures', redisClient);
     console.log('connected')
 
-    const bds = new BDS(true, redisCache);
+    const bds = new BDS('proxy', redisCache);
     await bds.init();
 
     bds.on('data', () => console.log('create', bds.debug()))

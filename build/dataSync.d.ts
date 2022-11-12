@@ -21,13 +21,13 @@ interface BSSyncState {
     };
 }
 export default class BDS<DataType> extends EventEmitter {
-    private readonly proxyMode;
+    private readonly mode;
     private readonly cache?;
     private readonly ttlCheckInterval;
     private $values;
     private syncTime;
     private syncType;
-    constructor(proxyMode: boolean, cache?: CacheIf, ttlCheckInterval?: number);
+    constructor(mode?: 'client' | 'server' | 'proxy', cache?: CacheIf, ttlCheckInterval?: number);
     checkTTL(): void;
     init(): Promise<void>;
     keys(): string[];

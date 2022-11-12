@@ -32,7 +32,7 @@ function init() {
         // прокси режим означает что данные удут просто проходит через узел без их десериализации (т.е. на узле использоваться не будут)
         const redisCache = new redis_cache_1.RedisCache('proxy.measures', redisClient);
         console.log('connected');
-        const bds = new dataSync_1.default(true, redisCache);
+        const bds = new dataSync_1.default('proxy', redisCache);
         yield bds.init();
         bds.on('data', () => console.log('create', bds.debug()));
         bds.on('delete', () => console.log('delete', bds.debug()));
