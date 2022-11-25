@@ -53,6 +53,10 @@ export default class BDS<DataType> extends EventEmitter {
     }
   }
 
+  get $cache() {
+    return this.cache;
+  }
+
   checkTTL() {
     const now = new Date();
     Object.keys(this.$values).forEach((key: string) => {

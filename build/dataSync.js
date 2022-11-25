@@ -31,6 +31,9 @@ class BDS extends events_1.EventEmitter {
             setInterval(() => this.checkTTL(), ttlCheckInterval * 1000);
         }
     }
+    get $cache() {
+        return this.cache;
+    }
     checkTTL() {
         const now = new Date();
         Object.keys(this.$values).forEach((key) => {

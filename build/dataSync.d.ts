@@ -28,6 +28,7 @@ export default class BDS<DataType> extends EventEmitter {
     private syncTime;
     private syncType;
     constructor(mode?: 'client' | 'server' | 'proxy', cache?: CacheIf, ttlCheckInterval?: number);
+    get $cache(): CacheIf;
     checkTTL(): void;
     init(): Promise<void>;
     keys(): string[];
