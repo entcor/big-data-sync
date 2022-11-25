@@ -8,5 +8,6 @@ export interface CacheIf {
         };
     }>;
     delete: (id: string) => {};
+    reset: () => {};
 }
 //# sourceMappingURL=interfaces.d.ts.map
