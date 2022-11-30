@@ -135,14 +135,14 @@ class BDS extends events_1.EventEmitter {
         const strItems = [];
         logd('bds => getDataForSync(start)', clientData.data.length, Object.values(clientData.data).slice(0, 7));
         if (this.syncType === 'full') {
+            const srcIdList = Object.keys(this.$values);
+            const destIdList = Object.keys(clientData.data);
+            const deletedItems = destIdList.filter(x => !srcIdList.includes(x));
+            deletedItems.forEach(key => {
+                strItems.push(`${key}${splitter}undefined`);
+            });
             Object.keys(this.$values)
                 .some((key) => {
-                const srcIdList = Object.keys(this.$values);
-                const destIdList = Object.keys(clientData.data);
-                const deletedItems = destIdList.filter(x => !srcIdList.includes(x));
-                deletedItems.forEach(key => {
-                    strItems.push(`${key}${splitter}undefined`);
-                });
                 if (!clientData.data[key]) // new object
                     strItems.push(`${key}${splitter}${this.$values[key].str}`);
                 else if (this.$values[key].rt > new Date(clientData.data[key])) { // cahnged object
