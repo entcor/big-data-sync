@@ -174,7 +174,7 @@ export default class BDS<DataType> extends EventEmitter {
 
     if (this.syncType === 'full') {
       Object.keys(this.$values)
-        .forEach((key) => {
+        .some((key) => {
           const srcIdList = Object.keys(this.$values);
           const destIdList = Object.keys(clientData.data);
 
@@ -189,6 +189,9 @@ export default class BDS<DataType> extends EventEmitter {
           if (this.$values[key].rt > new Date(clientData.data[key])) { // cahnged object
             strItems.push(`${key}${splitter}${this.$values[key].str}`);
           }
+
+          if (strItems.length > 50) return true;
+          return false;
         });
 
       logd('bds => getDataForSync(finish)', strItems.length, strItems.slice(0, 4))

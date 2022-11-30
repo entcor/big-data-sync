@@ -136,7 +136,7 @@ class BDS extends events_1.EventEmitter {
         logd('bds => getDataForSync(start)', clientData.data.length, Object.values(clientData.data).slice(0, 7));
         if (this.syncType === 'full') {
             Object.keys(this.$values)
-                .forEach((key) => {
+                .some((key) => {
                 const srcIdList = Object.keys(this.$values);
                 const destIdList = Object.keys(clientData.data);
                 const deletedItems = destIdList.filter(x => !srcIdList.includes(x));
@@ -148,6 +148,9 @@ class BDS extends events_1.EventEmitter {
                 else if (this.$values[key].rt > new Date(clientData.data[key])) { // cahnged object
                     strItems.push(`${key}${splitter}${this.$values[key].str}`);
                 }
+                if (strItems.length > 50)
+                    return true;
+                return false;
             });
             logd('bds => getDataForSync(finish)', strItems.length, strItems.slice(0, 4));
         }
