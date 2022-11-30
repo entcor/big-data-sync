@@ -148,7 +148,7 @@ class BDS extends events_1.EventEmitter {
                 else if (this.$values[key].rt > new Date(clientData.data[key])) { // cahnged object
                     strItems.push(`${key}${splitter}${this.$values[key].str}`);
                 }
-                if (strItems.length > 50)
+                if (strItems.length > 200)
                     return true;
                 return false;
             });

@@ -191,7 +191,7 @@ export default class BDS<DataType> extends EventEmitter {
             strItems.push(`${key}${splitter}${this.$values[key].str}`);
           }
 
-          if (strItems.length > 500) return true;
+          if (strItems.length > 200) return true;
           return false;
         });
 
