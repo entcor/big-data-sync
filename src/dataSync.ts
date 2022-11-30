@@ -170,7 +170,7 @@ export default class BDS<DataType> extends EventEmitter {
   getDataForSync(clientData: BSSyncState): string {
     const strItems = [];
 
-    logd('bds => getDataForSync(start)', clientData.data.length, Object.values(clientData.data).slice(0, 7))
+    logd('bds => getDataForSync(start)', clientData.data.length, () => Object.values(clientData.data).slice(0, 7))
 
     if (this.syncType === 'full') {
 
@@ -181,7 +181,7 @@ export default class BDS<DataType> extends EventEmitter {
       deletedItems.forEach(key => {
         strItems.push(`${key}${splitter}undefined`);
       })
-      
+
       Object.keys(this.$values)
         .some((key) => {
           if (!clientData.data[key]) // new object
@@ -195,7 +195,7 @@ export default class BDS<DataType> extends EventEmitter {
           return false;
         });
 
-      logd('bds => getDataForSync(finish)', strItems.length, strItems.slice(0, 4))
+      logd('bds => getDataForSync(finish)', strItems.length, () => strItems.slice(0, 4))
 
     } else {
       Object.keys(this.$values)

@@ -133,7 +133,7 @@ class BDS extends events_1.EventEmitter {
     // принятие рещение о недостающих элементах на основании состоянии клиента
     getDataForSync(clientData) {
         const strItems = [];
-        logd('bds => getDataForSync(start)', clientData.data.length, Object.values(clientData.data).slice(0, 7));
+        logd('bds => getDataForSync(start)', clientData.data.length, () => Object.values(clientData.data).slice(0, 7));
         if (this.syncType === 'full') {
             const srcIdList = Object.keys(this.$values);
             const destIdList = Object.keys(clientData.data);
@@ -152,7 +152,7 @@ class BDS extends events_1.EventEmitter {
                     return true;
                 return false;
             });
-            logd('bds => getDataForSync(finish)', strItems.length, strItems.slice(0, 4));
+            logd('bds => getDataForSync(finish)', strItems.length, () => strItems.slice(0, 4));
         }
         else {
             Object.keys(this.$values)
