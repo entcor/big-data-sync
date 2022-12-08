@@ -52,12 +52,14 @@ class BDS extends events_1.EventEmitter {
             if (this.cache) {
                 const data = yield this.cache.restore();
                 Object.keys(data).forEach(key => {
-                    this.$values[key] = {
-                        rt: data[key].rt,
-                        v: this.mode !== 'proxy' && JSON.parse(data[key].str),
-                        str: this.mode !== 'client' && data[key].str,
-                        expire: data[key].expire,
-                    };
+                    if (data[key].str !== 'false') {
+                        this.$values[key] = {
+                            rt: data[key].rt,
+                            v: this.mode !== 'proxy' && JSON.parse(data[key].str),
+                            str: this.mode !== 'client' && data[key].str,
+                            expire: data[key].expire,
+                        };
+                    }
                 });
             }
             this.inited = true;
@@ -79,6 +81,8 @@ class BDS extends events_1.EventEmitter {
         return Object.keys(this.$values).reduce((acc, key) => { acc[key] = this.$values[key].v; return acc; }, {});
     }
     set(k, v, ttl) {
+        if (!v)
+            v = undefined;
         const str = v === undefined ? undefined : JSON.stringify(v);
         if ((!this.$values[k] && !str) || (this.$values[k] && str === this.$values[k].str))
             return; // object is not changed
@@ -190,11 +194,16 @@ class BDS extends events_1.EventEmitter {
             const rt = new Date(items.shift());
             const data = {};
             for (let i = 0; i < items.length; i += 2) {
-                data[items[i]] = items[i + 1] === 'undefined' ? null : {
-                    str: this.mode !== 'client' && items[i + 1],
-                    v: this.mode === 'proxy' ? undefined : JSON.parse(items[i + 1]),
-                    rt,
-                };
+                if (items[i + 1] === 'false') {
+                    delete data[items[i]];
+                }
+                else {
+                    data[items[i]] = items[i + 1] === 'undefined' ? null : {
+                        str: this.mode !== 'client' && items[i + 1],
+                        v: this.mode === 'proxy' ? undefined : JSON.parse(items[i + 1]),
+                        rt,
+                    };
+                }
             }
             if (bulk)
                 this.syncTime = rt;
