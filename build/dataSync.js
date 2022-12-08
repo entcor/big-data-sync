@@ -199,7 +199,7 @@ class BDS extends events_1.EventEmitter {
                 }
                 else {
                     data[items[i]] = items[i + 1] === 'undefined' ? null : {
-                        str: this.mode !== 'client' && items[i + 1],
+                        str: items[i + 1],
                         v: this.mode === 'proxy' ? undefined : JSON.parse(items[i + 1]),
                         rt,
                     };
