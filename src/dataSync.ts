@@ -38,6 +38,7 @@ export default class BDS<DataType> extends EventEmitter {
   private $values: {[key: string]: BSValue<DataType>} = {};
   private syncTime: Date;
   private syncType = 'full';
+  private inited = false;
 
   constructor(
     private readonly mode: 'client' | 'server' | 'proxy' = 'server',
@@ -69,6 +70,8 @@ export default class BDS<DataType> extends EventEmitter {
   }
 
   async init(): Promise<void> {
+    this.inited = false;
+    
     if (this.cache) {
       const data = await this.cache.restore();
       Object.keys(data).forEach(key => {
@@ -80,6 +83,7 @@ export default class BDS<DataType> extends EventEmitter {
         };
       })
     }
+    this.inited = true;
   }
 
   keys(): string[] {
@@ -147,7 +151,7 @@ export default class BDS<DataType> extends EventEmitter {
               return prev;
           }, {} as any);
 
-        logd('bds => getSyncState(finish)', syncRtList.length, Object.keys(syncRtList).slice(0, 7))
+        logd('bds => getSyncState(finish)', syncRtList.length, () => Object.keys(syncRtList).slice(0, 7))
         
         return {
             rt: this.syncTime,
@@ -168,6 +172,8 @@ export default class BDS<DataType> extends EventEmitter {
   // метод сервера
   // принятие рещение о недостающих элементах на основании состоянии клиента
   getDataForSync(clientData: BSSyncState): string {
+    if (!this.inited) return undefined;
+
     const strItems = [];
 
     logd('bds => getDataForSync(start)', clientData.data.length, () => Object.values(clientData.data).slice(0, 7))

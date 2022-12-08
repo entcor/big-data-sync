@@ -25,6 +25,7 @@ class BDS extends events_1.EventEmitter {
         this.ttlCheckInterval = ttlCheckInterval;
         this.$values = {};
         this.syncType = 'full';
+        this.inited = false;
         this.syncTime = new Date(0);
         this.$values = {};
         if (this.ttlCheckInterval) {
@@ -47,6 +48,7 @@ class BDS extends events_1.EventEmitter {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
+            this.inited = false;
             if (this.cache) {
                 const data = yield this.cache.restore();
                 Object.keys(data).forEach(key => {
@@ -58,6 +60,7 @@ class BDS extends events_1.EventEmitter {
                     };
                 });
             }
+            this.inited = true;
         });
     }
     keys() {
@@ -116,7 +119,7 @@ class BDS extends events_1.EventEmitter {
                 prev[key] = this.$values[key].rt;
                 return prev;
             }, {});
-            logd('bds => getSyncState(finish)', syncRtList.length, Object.keys(syncRtList).slice(0, 7));
+            logd('bds => getSyncState(finish)', syncRtList.length, () => Object.keys(syncRtList).slice(0, 7));
             return {
                 rt: this.syncTime,
                 data: syncRtList,
@@ -132,6 +135,8 @@ class BDS extends events_1.EventEmitter {
     // метод сервера
     // принятие рещение о недостающих элементах на основании состоянии клиента
     getDataForSync(clientData) {
+        if (!this.inited)
+            return undefined;
         const strItems = [];
         logd('bds => getDataForSync(start)', clientData.data.length, () => Object.values(clientData.data).slice(0, 7));
         if (this.syncType === 'full') {
