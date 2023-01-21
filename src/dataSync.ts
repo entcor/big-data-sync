@@ -127,15 +127,19 @@ export default class BDS<DataType> extends EventEmitter {
     return Object.keys(this.$values).reduce((acc, key) => { acc[key] = this.$values[key].v; return acc; }, {});
   }
 
-  set (k: string, v: DataType, ttl?: number): void {
+  set(k: string, v: DataType, ttl?: number): void {
     if (!v) v = undefined;
-
     const compareObj = pickAndSort(v, this.fields);
-    
-    if ((!this.$values[k] && !compareObj.strObj) || (this.$values[k] && compareObj.strObj === this.$values[k].filteredStr)) return; // object is not changed
-    const str = compareObj.filtered ? JSON.stringify(v) : compareObj.strObj;
-
     const now = new Date();
+    
+    if ((!this.$values[k] && !compareObj.strObj) || (this.$values[k] && compareObj.strObj === this.$values[k].filteredStr)) {
+      // тут странно - не знаю как правильно но если фильтрующие поля не поменялись -> значение объекта все равно меняем (но толлько локально)
+      if (!this.$values[k] && v) this.$values[k] = { rt: now, v, str: undefined, filteredStr: undefined, expire: new Date((new Date).getTime() + ttl * 1000) };
+      else this.$values[k].v = v;
+      return; // object is not changed
+    }
+
+    const str = compareObj.filtered ? JSON.stringify(v) : compareObj.strObj;
     const filteredStr = this.filtered ? compareObj.strObj : undefined;
 
     this.$values[k] = {
