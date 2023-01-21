@@ -16,12 +16,32 @@ const events_1 = require("events");
 const etaglogger_1 = __importDefault(require("etaglogger"));
 const splitter = '#@%@#';
 const logd = (0, etaglogger_1.default)('BDS');
+// realTimeSync: server (set) => send to client (clnt.setFromServer()) => client.onData()
+// при изменени параметра - сервер передаст изменение на клиент
+// sliceSync onTimer: clent.getSyncState() => send to server => server generate differences => send to client
+// на случай отсутствия связи или ошибок нет уверенности в том, что данные синхронны
+// в этом случае клиент передает серверу последнее время синхронизации и времена всех 
+// синхронизированных поле этого времени параметров
+// сервверр проверить и выберет все параметры, которые имеют время обновления после последнего 
+// времени синхронизации и не входят в присланный клиентом список 
+// выбрасываем не нужные поля + сортируем
+// filtered - значит объект для проверки изменений отличается от сохряняемого объекта
+function pickAndSort(obj = {}, fields) {
+    const filtered = !!(fields === null || fields === void 0 ? void 0 : fields.length);
+    if (!obj)
+        return { obj: undefined, strObj: undefined, filtered };
+    const $fields = (filtered ? fields : Object.keys(obj)).sort();
+    const res = {};
+    $fields.forEach(key => res[key] = obj[key]);
+    return { obj: res, strObj: JSON.stringify(res), filtered };
+}
 ;
 class BDS extends events_1.EventEmitter {
-    constructor(mode = 'server', cache, ttlCheckInterval = 0) {
+    constructor(mode = 'server', cache, fields = [], ttlCheckInterval = 0) {
         super();
         this.mode = mode;
         this.cache = cache;
+        this.fields = fields;
         this.ttlCheckInterval = ttlCheckInterval;
         this.$values = {};
         this.syncType = 'full';
@@ -31,6 +51,10 @@ class BDS extends events_1.EventEmitter {
         if (this.ttlCheckInterval) {
             setInterval(() => this.checkTTL(), ttlCheckInterval * 1000);
         }
+    }
+    get filtered() {
+        var _a;
+        return ((_a = this.fields) === null || _a === void 0 ? void 0 : _a.length) > 0;
     }
     get $cache() {
         return this.cache;
@@ -57,6 +81,7 @@ class BDS extends events_1.EventEmitter {
                             rt: data[key].rt,
                             v: this.mode !== 'proxy' && JSON.parse(data[key].str),
                             str: this.mode !== 'client' && data[key].str,
+                            filteredStr: this.mode !== 'client' && data[key].filteredStr,
                             expire: data[key].expire,
                         };
                     }
@@ -83,11 +108,17 @@ class BDS extends events_1.EventEmitter {
     set(k, v, ttl) {
         if (!v)
             v = undefined;
-        const str = v === undefined ? undefined : JSON.stringify(v);
-        if ((!this.$values[k] && !str) || (this.$values[k] && str === this.$values[k].str))
+        const compareObj = pickAndSort(v, this.fields);
+        if ((!this.$values[k] && !compareObj.strObj) || (this.$values[k] && compareObj.strObj === this.$values[k].filteredStr))
             return; // object is not changed
+        const str = compareObj.filtered ? JSON.stringify(v) : compareObj.strObj;
         const now = new Date();
-        this.$values[k] = { rt: now, v, str, expire: new Date((new Date).getTime() + ttl * 1000) };
+        const filteredStr = this.filtered ? compareObj.strObj : undefined;
+        this.$values[k] = {
+            rt: now, v, str,
+            filteredStr,
+            expire: new Date((new Date).getTime() + ttl * 1000),
+        };
         if (!v) {
             this.emit("delete", k, this.$values[k]);
             delete this.$values[k];
@@ -96,7 +127,7 @@ class BDS extends events_1.EventEmitter {
             return;
         }
         if (this.cache)
-            this.cache.set(k, now, str);
+            this.cache.set(k, now, str, filteredStr);
         this.emit("data", {
             data: { [k]: { str, v } || null },
             rt: now,
@@ -117,6 +148,8 @@ class BDS extends events_1.EventEmitter {
     // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
     getSyncState() {
         logd('bds => getSyncState(start)');
+        // полная синхронизация: {rt: sync Time, data: { key: rt, key2: rt }}
+        // т.е. получаем полный список всех элементов хранилищя с их временем изменения
         if (this.syncType === 'full') {
             const syncRtList = Object.keys(this.$values)
                 .reduce((prev, key) => {
@@ -138,6 +171,10 @@ class BDS extends events_1.EventEmitter {
     }
     // метод сервера
     // принятие рещение о недостающих элементах на основании состоянии клиента
+    // от клиента пришли времена последних обновлений каждого объекта
+    // 1) вибираем из списка те что у меня (сервера) уже нет а а у клиента есть => список удаления
+    // 2) добавляем новые
+    // 3) добавляем измененные объекты (время сервера > времени клиента)
     getDataForSync(clientData) {
         if (!this.inited)
             return undefined;
@@ -236,14 +273,13 @@ class BDS extends events_1.EventEmitter {
             // }
             if (this.cache) {
                 Object.keys(evData.data).forEach(key => {
-                    this.cache.set(key, evData.data[key].rt, evData.data[key].str);
+                    this.cache.set(key, evData.data[key].rt, evData.data[key].str, undefined);
                 });
             }
             if (Object.keys(evData.data).length)
                 this.emit("data", evData);
         }
         catch (ex) {
-            console.log(ex);
             this.emit('error', ex.message);
         }
     }

@@ -12,9 +12,9 @@ export class RedisCache implements CacheIf {
     private readonly redisClient,
   ) {}
 
-  set(id: string, rt: Date, value: string, expire?: Date): Promise<void> {
+  set(id: string, rt: Date, value: string, filteredValue: string, expire?: Date): Promise<void> {
     logd('bds cache => set', id)
-    return this.redisClient.HSET(this.nodeId, id, `${rt.toString()}${splitter}${value}${splitter}${expire && expire.getTime()}`);
+    return this.redisClient.HSET(this.nodeId, id, `${rt.toString()}${splitter}${value}${splitter}${filteredValue}${splitter}${expire && expire.getTime()}`);
   }
 
   delete(id: string) {
@@ -26,7 +26,7 @@ export class RedisCache implements CacheIf {
     return this.redisClient.DEL(this.nodeId);
   }
 
-  async restore(): Promise<{[key: string]: { rt: Date, str: string }}> {
+  async restore(): Promise<{[key: string]: { rt: Date, str: string, filteredStr: string }}> {
     logd('bds cache => cache restore')
     const HGETALL = promisify(this.redisClient.HGETALL).bind(this.redisClient);
     const data: { [key:string]: string } = (await HGETALL(this.nodeId)) || {};
@@ -35,8 +35,8 @@ export class RedisCache implements CacheIf {
     Object.keys(data)
       .forEach(key => {
         const rec = data[key];
-        const [rtstr, str, expire] = rec.split(splitter);
-        try { res[key] = { rt: new Date(rtstr), str, expire: new Date(expire) }; } 
+        const [rtstr, str, filteredStr, expire] = rec.split(splitter);
+        try { res[key] = { rt: new Date(rtstr), str, filteredStr, expire: new Date(expire) }; } 
         catch (ex) { }
       })
 

@@ -10,7 +10,10 @@ function init() {
     const sio_client = (0, socket_io_client_1.io)("ws://127.0.0.1:3000", {});
     const bds = new dataSync_1.default('client');
     bds.on('data', (data) => {
-        console.log('create', data.bulk, Object.keys(data.data).length);
+        console.log('create', data.bulk, data.data);
+    });
+    bds.on('delete', (data) => {
+        console.log('delete', data);
     });
     // bds.on('delete', () => console.log('delete', bds.debug()))
     new socketio_1.default('measures', bds).startClient(sio_client);

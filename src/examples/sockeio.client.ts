@@ -7,8 +7,13 @@ function init() {
 
     const bds = new BDS<any>('client');
     bds.on('data', (data) => {
-        console.log('create', data.bulk, Object.keys(data.data).length);
+        console.log('create', data.bulk, data.data);
     })
+
+    bds.on('delete', (data) => {
+        console.log('delete', data);
+    })
+
     // bds.on('delete', () => console.log('delete', bds.debug()))
     new bdsSioBridge('measures', bds).startClient(sio_client);
 }

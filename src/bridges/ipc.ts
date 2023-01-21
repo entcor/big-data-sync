@@ -64,7 +64,7 @@ export default class Bridge<DataType> {
       logd('IPC client => connecting', this.nodeId);
 
       const sendSyncState = () => {
-          const syncState = this.bds.getSyncState(); // читаем у клиента состояние для отправки на сервер
+          const syncState = this.bds.getSyncState(); // читаем у клиента состояние для отправки на сервер (время, время каждого параметр)
           this.ipc.of[this.nodeId].emit(`list:state`, syncState);
       }
 

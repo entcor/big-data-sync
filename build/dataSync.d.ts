@@ -5,6 +5,7 @@ export interface BSValue<DataType> {
     rt: Date;
     v: DataType;
     str: string;
+    filteredStr: string;
     expire: Date;
 }
 export interface DataEvent<DataType> {
@@ -23,12 +24,14 @@ interface BSSyncState {
 export default class BDS<DataType> extends EventEmitter {
     private readonly mode;
     private readonly cache?;
+    private readonly fields;
     private readonly ttlCheckInterval;
     private $values;
     private syncTime;
     private syncType;
     private inited;
-    constructor(mode?: 'client' | 'server' | 'proxy', cache?: CacheIf, ttlCheckInterval?: number);
+    constructor(mode?: 'client' | 'server' | 'proxy', cache?: CacheIf, fields?: string[], ttlCheckInterval?: number);
+    get filtered(): boolean;
     get $cache(): CacheIf;
     checkTTL(): void;
     init(): Promise<void>;
