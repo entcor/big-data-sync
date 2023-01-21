@@ -115,8 +115,10 @@ class BDS extends events_1.EventEmitter {
             console.log(">>>>>", k);
             if (!this.$values[k] && v)
                 this.$values[k] = { rt: now, v, str: undefined, filteredStr: undefined, expire: new Date((new Date).getTime() + ttl * 1000) };
-            else
+            else {
                 this.$values[k].v = v;
+                this.$values[k].rt = now;
+            }
             return; // object is not changed
         }
         const str = compareObj.filtered ? JSON.stringify(v) : compareObj.strObj;
