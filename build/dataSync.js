@@ -110,9 +110,9 @@ class BDS extends events_1.EventEmitter {
             v = undefined;
         const compareObj = pickAndSort(v, this.fields);
         const now = new Date();
+        logd("bds => set", k);
         if ((!this.$values[k] && !compareObj.strObj) || (this.$values[k] && compareObj.strObj === this.$values[k].filteredStr)) {
             // тут странно - не знаю как правильно но если фильтрующие поля не поменялись -> значение объекта все равно меняем (но толлько локально)
-            console.log(">>>>>", k);
             if (!this.$values[k] && v)
                 this.$values[k] = { rt: now, v, str: undefined, filteredStr: undefined, expire: new Date((new Date).getTime() + ttl * 1000) };
             else {
@@ -188,7 +188,7 @@ class BDS extends events_1.EventEmitter {
         if (!this.inited)
             return undefined;
         const strItems = [];
-        logd('bds => getDataForSync(start)', clientData.data.length, () => Object.values(clientData.data).slice(0, 7));
+        logd('bds => getDataForSync(start)', clientData.data.length);
         if (this.syncType === 'full') {
             const srcIdList = Object.keys(this.$values);
             const destIdList = Object.keys(clientData.data);
@@ -207,7 +207,7 @@ class BDS extends events_1.EventEmitter {
                     return true;
                 return false;
             });
-            logd('bds => getDataForSync(finish)', strItems.length, () => strItems.slice(0, 4));
+            logd('bds => getDataForSync(finish)');
         }
         else {
             Object.keys(this.$values)
@@ -234,7 +234,7 @@ class BDS extends events_1.EventEmitter {
     // метод клиента
     // межсерверная синхронизация (bulk - срезовая)
     setSyncItems(strData, bulk) {
-        logd('>>>> setSyncItems', strData, bulk);
+        logd('>>>> setSyncItems, len=', strData.length, bulk);
         try {
             const items = strData.split(splitter).filter(el => !!el);
             const rt = new Date(items.shift());
