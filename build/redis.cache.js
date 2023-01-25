@@ -43,7 +43,6 @@ class RedisCache {
                 .forEach(key => {
                 const rec = data[key];
                 const [rtstr, str, filteredStr, expire] = rec.split(splitter);
-                console.log('rec', rec);
                 try {
                     res[key] = { rt: new Date(rtstr), str: parseStr(str), filteredStr: parseStr(filteredStr), expire: parseTime(expire) };
                 }

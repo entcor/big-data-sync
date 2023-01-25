@@ -10,12 +10,12 @@ export default class SioBridge<DataType> {
   
   startServer(sio) {
     sio.on('connection', (socket) => {
-      logd(`ipc server (${this.bds.id}) => client connected`, this.nodeId, `clients=${sio.engine.clientsCount}` [this.bds.id]); 
+      logd(`ipc server (${this.bds.id}) => client connected`, this.nodeId, [this.bds.id]); 
 
       let client = socket;
 
       socket.on('disconnect', () => {
-        logd(`ipc server (${this.bds.id}) => dconnect`, this.nodeId, `clients=${sio.engine.clientsCount}` [this.bds.id]); 
+        logd(`ipc server (${this.bds.id}) => dconnect`, this.nodeId, [this.bds.id]); 
         client = undefined;
       });
 
