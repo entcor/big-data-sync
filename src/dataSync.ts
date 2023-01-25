@@ -249,7 +249,7 @@ export default class BDS<DataType> extends EventEmitter {
             strItems.push(`${key}${splitter}${this.$values[key].str}`);
           else 
           if (this.$values[key].rt > new Date(clientData.data[key])) { // cahnged object
-            logd(`bds(${this.id}) => compare->upd`, this.$values[key].rt, new Date(clientData.data[key])),
+            logd(`bds(${this.id}) => compare->upd`, key, this.$values[key].rt, new Date(clientData.data[key])),
             strItems.push(`${key}${splitter}${this.$values[key].str}`);
           }
 

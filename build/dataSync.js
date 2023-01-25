@@ -210,7 +210,7 @@ class BDS extends events_1.EventEmitter {
                     logd(`bds(${this.id}) => compare->add`, key),
                         strItems.push(`${key}${splitter}${this.$values[key].str}`);
                 else if (this.$values[key].rt > new Date(clientData.data[key])) { // cahnged object
-                    logd(`bds(${this.id}) => compare->upd`, this.$values[key].rt, new Date(clientData.data[key])),
+                    logd(`bds(${this.id}) => compare->upd`, key, this.$values[key].rt, new Date(clientData.data[key])),
                         strItems.push(`${key}${splitter}${this.$values[key].str}`);
                 }
                 if (strItems.length > 200)
