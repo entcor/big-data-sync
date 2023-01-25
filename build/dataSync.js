@@ -113,9 +113,9 @@ class BDS extends events_1.EventEmitter {
         const compareObj = pickAndSort(v, this.fields);
         const now = new Date();
         logd(`bds(${this.id}) => set`, k, [this.id]);
+        logd(`bds(${this.id}) => set(test)`, this.$values[k] && compareObj.strObj === this.$values[k].filteredStr, compareObj.strObj, this.$values[k].filteredStr, [this.id]);
         if ((!this.$values[k] && !compareObj.strObj) || (this.$values[k] && compareObj.strObj === this.$values[k].filteredStr)) {
             // тут странно - не знаю как правильно но если фильтрующие поля не поменялись -> значение объекта все равно меняем (но толлько локально)
-            logd(`bds(${this.id}) => set(test)`, compareObj.strObj, this.$values[k].filteredStr, [this.id]);
             if (!this.$values[k] && v)
                 this.$values[k] = { rt: now, v, str: undefined, filteredStr: undefined, expire: new Date((new Date).getTime() + ttl * 1000) };
             else {
