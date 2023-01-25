@@ -200,7 +200,7 @@ export default class BDS<DataType> extends EventEmitter {
               return prev;
           }, {} as any);
 
-        logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`, () => Object.keys(syncRtList).slice(0, 5).map(key => syncRtList[key]), [this.id]);
+        logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`, () => Object.keys(syncRtList).slice(0, 5).reduce((agg, key) => { agg[key] = syncRtList[key]; return agg; }), [this.id]);
         
         return {
             rt: this.syncTime,
@@ -237,9 +237,11 @@ export default class BDS<DataType> extends EventEmitter {
       Object.keys(this.$values)
         .some((key) => {
           if (!clientData.data[key]) // new object
+            logd(`bds(${this.id}) => compare->add`, key),
             strItems.push(`${key}${splitter}${this.$values[key].str}`);
           else 
           if (this.$values[key].rt > new Date(clientData.data[key])) { // cahnged object
+            logd(`bds(${this.id}) => compare->upd`, this.$values[key].rt, new Date(clientData.data[key])),
             strItems.push(`${key}${splitter}${this.$values[key].str}`);
           }
 

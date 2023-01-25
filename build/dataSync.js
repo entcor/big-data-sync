@@ -169,7 +169,7 @@ class BDS extends events_1.EventEmitter {
                 prev[key] = this.$values[key].rt;
                 return prev;
             }, {});
-            logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`, () => Object.keys(syncRtList).slice(0, 5).map(key => syncRtList[key]), [this.id]);
+            logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`, () => Object.keys(syncRtList).slice(0, 5).reduce((agg, key) => { agg[key] = syncRtList[key]; return agg; }), [this.id]);
             return {
                 rt: this.syncTime,
                 data: syncRtList,
@@ -198,9 +198,11 @@ class BDS extends events_1.EventEmitter {
             Object.keys(this.$values)
                 .some((key) => {
                 if (!clientData.data[key]) // new object
-                    strItems.push(`${key}${splitter}${this.$values[key].str}`);
+                    logd(`bds(${this.id}) => compare->add`, key),
+                        strItems.push(`${key}${splitter}${this.$values[key].str}`);
                 else if (this.$values[key].rt > new Date(clientData.data[key])) { // cahnged object
-                    strItems.push(`${key}${splitter}${this.$values[key].str}`);
+                    logd(`bds(${this.id}) => compare->upd`, this.$values[key].rt, new Date(clientData.data[key])),
+                        strItems.push(`${key}${splitter}${this.$values[key].str}`);
                 }
                 if (strItems.length > 200)
                     return true;
