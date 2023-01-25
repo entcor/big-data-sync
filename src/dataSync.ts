@@ -226,7 +226,7 @@ export default class BDS<DataType> extends EventEmitter {
   // 2) добавляем новые
   // 3) добавляем измененные объекты (время сервера > времени клиента)
   getDataForSync(clientData: BSSyncState): string {
-    if (!this.inited) return undefined;
+    if (!this.inited || !clientData) return undefined;
 
     const strItems = [];
 

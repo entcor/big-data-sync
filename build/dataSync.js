@@ -193,7 +193,7 @@ class BDS extends events_1.EventEmitter {
     // 2) добавляем новые
     // 3) добавляем измененные объекты (время сервера > времени клиента)
     getDataForSync(clientData) {
-        if (!this.inited)
+        if (!this.inited || !clientData)
             return undefined;
         const strItems = [];
         logd(`bds(${this.id}) => getDataForSync(start)`, () => Object.keys(clientData.data).length, () => Object.keys(clientData.data).slice(0, 5).map(key => clientData.data[key]), [this.id]);
