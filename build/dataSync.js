@@ -213,7 +213,7 @@ class BDS extends events_1.EventEmitter {
                     logd(`bds(${this.id}) => compare->upd`, key, this.$values[key].rt, new Date(clientData.data[key])),
                         strItems.push(`${key}${splitter}${this.$values[key].str}`);
                 }
-                if (strItems.length > 200)
+                if (strItems.length > 1000)
                     return true;
                 return false;
             });
