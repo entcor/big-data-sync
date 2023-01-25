@@ -18,7 +18,7 @@ class Bridge {
         this.ipc.config.id = this.nodeId;
         this.ipc.config.retry = 1500;
         this.ipc.serve(() => {
-            logd(`ipc server (${this.bds.id}) => serve start`, this.nodeId, [this.bds.id]);
+            logd(`ipc server (${this.bds.id}) => server start`, this.nodeId, [this.bds.id]);
             this.ipc.server.on(`list:state`, (syncState, socket) => {
                 client = socket;
                 const syncData = this.bds.getDataForSync(syncState);

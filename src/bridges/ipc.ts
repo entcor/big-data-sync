@@ -22,7 +22,7 @@ export default class Bridge<DataType> {
       
       this.ipc.serve(
         () => {
-          logd(`ipc server (${this.bds.id}) => serve start`, this.nodeId, [this.bds.id]); 
+          logd(`ipc server (${this.bds.id}) => server start`, this.nodeId, [this.bds.id]);
 
           this.ipc.server.on(`list:state`,
               (syncState, socket) => {

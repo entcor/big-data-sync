@@ -1,4 +1,6 @@
 import BigKVSync, { DataEvent } from "../dataSync";
+import TagLogger from 'etaglogger';
+const logd = TagLogger('BDS.SOCKETIO');
 
 export default class SioBridge<DataType> {
   constructor(
@@ -8,9 +10,12 @@ export default class SioBridge<DataType> {
   
   startServer(sio) {
     sio.on('connection', (socket) => {
+      logd(`ipc server (${this.bds.id}) => client connected`, this.nodeId, `clients=${sio.engine.clientsCount}` [this.bds.id]); 
+
       let client = socket;
 
       socket.on('disconnect', () => {
+        logd(`ipc server (${this.bds.id}) => dconnect`, this.nodeId, `clients=${sio.engine.clientsCount}` [this.bds.id]); 
         client = undefined;
       });
 

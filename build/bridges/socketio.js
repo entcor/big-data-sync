@@ -1,5 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const etaglogger_1 = __importDefault(require("etaglogger"));
+const logd = (0, etaglogger_1.default)('BDS.SOCKETIO');
 class SioBridge {
     constructor(nodeId, bds) {
         this.nodeId = nodeId;
@@ -7,8 +12,10 @@ class SioBridge {
     }
     startServer(sio) {
         sio.on('connection', (socket) => {
+            logd(`ipc server (${this.bds.id}) => client connected`, this.nodeId, `clients=${sio.engine.clientsCount}`[this.bds.id]);
             let client = socket;
             socket.on('disconnect', () => {
+                logd(`ipc server (${this.bds.id}) => dconnect`, this.nodeId, `clients=${sio.engine.clientsCount}`[this.bds.id]);
                 client = undefined;
             });
             this.bds.on('data', ($d) => {
