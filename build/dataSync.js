@@ -205,7 +205,7 @@ class BDS extends events_1.EventEmitter {
                     return true;
                 return false;
             });
-            logd(`bds(${this.id}) => getDataForSync(finish)`, [this.id]);
+            logd(`bds(${this.id}) => getDataForSync(finish)`, () => `count=${strItems.length}`, [this.id]);
         }
         else {
             Object.keys(this.$values)

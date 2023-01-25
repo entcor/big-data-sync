@@ -245,7 +245,7 @@ export default class BDS<DataType> extends EventEmitter {
           return false;
         });
 
-      logd(`bds(${this.id}) => getDataForSync(finish)`, [this.id])
+      logd(`bds(${this.id}) => getDataForSync(finish)`, () => `count=${strItems.length}`, [this.id])
 
     } else {
       Object.keys(this.$values)
