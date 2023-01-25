@@ -156,6 +156,7 @@ class BDS extends events_1.EventEmitter {
     }
     // метод клиента
     // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
+    // server=>client (getSyncState) => client=>server(response), server => send changes 
     getSyncState() {
         logd(`bds(${this.id}) => getSyncState(start)`);
         // полная синхронизация: {rt: sync Time, data: { key: rt, key2: rt }}
@@ -166,18 +167,13 @@ class BDS extends events_1.EventEmitter {
                 prev[key] = this.$values[key].rt;
                 return prev;
             }, {});
-            logd(`bds(${this.id}) =>getSyncState(finish)`, syncRtList.length, () => Object.keys(syncRtList).slice(0, 7));
+            logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`);
             return {
                 rt: this.syncTime,
                 data: syncRtList,
             };
         }
         return undefined;
-        // const syncRtList = Object.keys(this.values)
-        //     .reduce((prev, key) => {
-        //         if (this.values[key].rt > this.syncTime) prev[key] = 1;
-        //         return prev;
-        //     }, {} as any);
     }
     // метод сервера
     // принятие рещение о недостающих элементах на основании состоянии клиента
@@ -189,7 +185,7 @@ class BDS extends events_1.EventEmitter {
         if (!this.inited)
             return undefined;
         const strItems = [];
-        logd(`bds(${this.id}) =>getDataForSync(start)`, clientData.data.length);
+        logd(`bds(${this.id}) => getDataForSync(start)`, clientData.data.length, Object.keys(clientData.data).slice(0, 5).map(key => clientData.data[key]));
         if (this.syncType === 'full') {
             const srcIdList = Object.keys(this.$values);
             const destIdList = Object.keys(clientData.data);
@@ -208,7 +204,7 @@ class BDS extends events_1.EventEmitter {
                     return true;
                 return false;
             });
-            logd(`bds(${this.id}) =>getDataForSync(finish)`);
+            logd(`bds(${this.id}) => getDataForSync(finish)`);
         }
         else {
             Object.keys(this.$values)

@@ -181,6 +181,7 @@ export default class BDS<DataType> extends EventEmitter {
 
   // метод клиента
   // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
+  // server=>client (getSyncState) => client=>server(response), server => send changes 
   getSyncState(): BSSyncState {
 
     logd(`bds(${this.id}) => getSyncState(start)`)
@@ -194,7 +195,7 @@ export default class BDS<DataType> extends EventEmitter {
               return prev;
           }, {} as any);
 
-        logd(`bds(${this.id}) =>getSyncState(finish)`, syncRtList.length, () => Object.keys(syncRtList).slice(0, 7))
+        logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`);
         
         return {
             rt: this.syncTime,
@@ -203,13 +204,6 @@ export default class BDS<DataType> extends EventEmitter {
     }
 
     return undefined;
-
-    // const syncRtList = Object.keys(this.values)
-    //     .reduce((prev, key) => {
-    //         if (this.values[key].rt > this.syncTime) prev[key] = 1;
-    //         return prev;
-    //     }, {} as any);
-
   }
 
   // метод сервера
@@ -223,7 +217,7 @@ export default class BDS<DataType> extends EventEmitter {
 
     const strItems = [];
 
-    logd(`bds(${this.id}) =>getDataForSync(start)`, clientData.data.length)
+    logd(`bds(${this.id}) => getDataForSync(start)`, clientData.data.length, Object.keys(clientData.data).slice(0, 5).map(key => clientData.data[key]))
 
     if (this.syncType === 'full') {
 
@@ -248,7 +242,7 @@ export default class BDS<DataType> extends EventEmitter {
           return false;
         });
 
-      logd(`bds(${this.id}) =>getDataForSync(finish)`)
+      logd(`bds(${this.id}) => getDataForSync(finish)`)
 
     } else {
       Object.keys(this.$values)
