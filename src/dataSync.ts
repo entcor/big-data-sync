@@ -220,7 +220,7 @@ export default class BDS<DataType> extends EventEmitter {
 
     const strItems = [];
 
-    logd(`bds(${this.id}) => getDataForSync(start)`, clientData.data.length, Object.keys(clientData.data).slice(0, 5).map(key => clientData.data[key]), [this.id])
+    logd(`bds(${this.id}) => getDataForSync(start)`, () => Object.keys(clientData.data).length, () => Object.keys(clientData.data).slice(0, 5).map(key => clientData.data[key]), [this.id])
 
     if (this.syncType === 'full') {
 

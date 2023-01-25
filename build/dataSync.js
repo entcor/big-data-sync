@@ -186,7 +186,7 @@ class BDS extends events_1.EventEmitter {
         if (!this.inited)
             return undefined;
         const strItems = [];
-        logd(`bds(${this.id}) => getDataForSync(start)`, clientData.data.length, Object.keys(clientData.data).slice(0, 5).map(key => clientData.data[key]), [this.id]);
+        logd(`bds(${this.id}) => getDataForSync(start)`, () => Object.keys(clientData.data).length, () => Object.keys(clientData.data).slice(0, 5).map(key => clientData.data[key]), [this.id]);
         if (this.syncType === 'full') {
             const srcIdList = Object.keys(this.$values);
             const destIdList = Object.keys(clientData.data);
