@@ -200,7 +200,7 @@ export default class BDS<DataType> extends EventEmitter {
               return prev;
           }, {} as any);
 
-        logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`, [this.id]);
+        logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`, () => Object.keys(syncRtList).slice(0, 5).map(key => syncRtList[key]), [this.id]);
         
         return {
             rt: this.syncTime,
