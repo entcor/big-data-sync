@@ -106,6 +106,9 @@ export default class BDS<DataType> extends EventEmitter {
         }
       })
     }
+
+    logd(`bds(${this.id}) => inited !!!!`, [this.id]);
+    
     this.inited = true;
   }
 
@@ -133,7 +136,7 @@ export default class BDS<DataType> extends EventEmitter {
     const compareObj = pickAndSort(v, this.fields);
     const now = new Date();
 
-    logd(`bds(${this.id}) => set`, k);
+    logd(`bds(${this.id}) => set`, k, [this.id]);
 
     if ((!this.$values[k] && !compareObj.strObj) || (this.$values[k] && compareObj.strObj === this.$values[k].filteredStr)) {
       // тут странно - не знаю как правильно но если фильтрующие поля не поменялись -> значение объекта все равно меняем (но толлько локально)
@@ -184,7 +187,7 @@ export default class BDS<DataType> extends EventEmitter {
   // server=>client (getSyncState) => client=>server(response), server => send changes 
   getSyncState(): BSSyncState {
 
-    logd(`bds(${this.id}) => getSyncState(start)`)
+    logd(`bds(${this.id}) => getSyncState(start)`, [this.id])
 
     // полная синхронизация: {rt: sync Time, data: { key: rt, key2: rt }}
     // т.е. получаем полный список всех элементов хранилищя с их временем изменения
@@ -195,7 +198,7 @@ export default class BDS<DataType> extends EventEmitter {
               return prev;
           }, {} as any);
 
-        logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`);
+        logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`, [this.id]);
         
         return {
             rt: this.syncTime,
@@ -217,7 +220,7 @@ export default class BDS<DataType> extends EventEmitter {
 
     const strItems = [];
 
-    logd(`bds(${this.id}) => getDataForSync(start)`, clientData.data.length, Object.keys(clientData.data).slice(0, 5).map(key => clientData.data[key]))
+    logd(`bds(${this.id}) => getDataForSync(start)`, clientData.data.length, Object.keys(clientData.data).slice(0, 5).map(key => clientData.data[key]), [this.id])
 
     if (this.syncType === 'full') {
 
@@ -242,7 +245,7 @@ export default class BDS<DataType> extends EventEmitter {
           return false;
         });
 
-      logd(`bds(${this.id}) => getDataForSync(finish)`)
+      logd(`bds(${this.id}) => getDataForSync(finish)`, [this.id])
 
     } else {
       Object.keys(this.$values)
@@ -271,7 +274,7 @@ export default class BDS<DataType> extends EventEmitter {
   // межсерверная синхронизация (bulk - срезовая)
   setSyncItems(strData: string, bulk: boolean) {
 
-    logd(`bds(${this.id}) => setSyncItems, len=`, strData.length, bulk);
+    logd(`bds(${this.id}) => setSyncItems, len=`, strData.length, bulk, [this.id]);
 
     try {
       const items = strData.split(splitter).filter(el => !!el);
