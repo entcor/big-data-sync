@@ -13,12 +13,12 @@ export class RedisCache implements CacheIf {
   ) {}
 
   set(id: string, rt: Date, value: string, filteredValue: string, expire?: Date): Promise<void> {
-    logd('bds cache => set', id)
+    logd(`bds cache ${this.nodeId} => set`, id, [this.nodeId])
     return this.redisClient.HSET(this.nodeId, id, `${rt.toString()}${splitter}${value}${splitter}${filteredValue}${splitter}${expire && expire.getTime()}`);
   }
 
   delete(id: string) {
-    logd('bds cache => delete', id)
+    logd(`bds cache ${this.nodeId} => delete`, id, [this.nodeId])
     return this.redisClient.HDEL(this.nodeId, id);
   }
 
@@ -27,7 +27,7 @@ export class RedisCache implements CacheIf {
   }
 
   async restore(): Promise<{[key: string]: { rt: Date, str: string, filteredStr: string }}> {
-    logd('bds cache => cache restore')
+    logd(`bds cache ${this.nodeId} => cache restore`, [this.nodeId])
     const HGETALL = promisify(this.redisClient.HGETALL).bind(this.redisClient);
     const data: { [key:string]: string } = (await HGETALL(this.nodeId)) || {};
     const res = {};
@@ -40,7 +40,7 @@ export class RedisCache implements CacheIf {
         catch (ex) { }
       })
 
-    logd('bds cache => cache restored', Object.keys(res).length);
+    logd(`bds cache ${this.nodeId} => cache restored`, Object.keys(res).length, [this.nodeId]);
 
     return res;
   }

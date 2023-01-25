@@ -22,6 +22,7 @@ interface BSSyncState {
     };
 }
 export default class BDS<DataType> extends EventEmitter {
+    readonly id: string;
     private readonly mode;
     private readonly cache?;
     private readonly fields;
@@ -30,8 +31,8 @@ export default class BDS<DataType> extends EventEmitter {
     private syncTime;
     private syncType;
     private inited;
-    constructor(mode?: 'client' | 'server' | 'proxy', cache?: CacheIf, fields?: string[], ttlCheckInterval?: number);
-    get filtered(): boolean;
+    constructor(id: string, mode?: 'client' | 'server' | 'proxy', cache?: CacheIf, fields?: string[], ttlCheckInterval?: number);
+    private get filtered();
     get $cache(): CacheIf;
     checkTTL(): void;
     init(): Promise<void>;

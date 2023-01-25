@@ -23,11 +23,11 @@ class RedisCache {
         this.redisClient = redisClient;
     }
     set(id, rt, value, filteredValue, expire) {
-        logd('bds cache => set', id);
+        logd(`bds cache ${this.nodeId} => set`, id, [this.nodeId]);
         return this.redisClient.HSET(this.nodeId, id, `${rt.toString()}${splitter}${value}${splitter}${filteredValue}${splitter}${expire && expire.getTime()}`);
     }
     delete(id) {
-        logd('bds cache => delete', id);
+        logd(`bds cache ${this.nodeId} => delete`, id, [this.nodeId]);
         return this.redisClient.HDEL(this.nodeId, id);
     }
     reset() {
@@ -35,7 +35,7 @@ class RedisCache {
     }
     restore() {
         return __awaiter(this, void 0, void 0, function* () {
-            logd('bds cache => cache restore');
+            logd(`bds cache ${this.nodeId} => cache restore`, [this.nodeId]);
             const HGETALL = (0, util_1.promisify)(this.redisClient.HGETALL).bind(this.redisClient);
             const data = (yield HGETALL(this.nodeId)) || {};
             const res = {};
@@ -48,7 +48,7 @@ class RedisCache {
                 }
                 catch (ex) { }
             });
-            logd('bds cache => cache restored', Object.keys(res).length);
+            logd(`bds cache ${this.nodeId} => cache restored`, Object.keys(res).length, [this.nodeId]);
             return res;
         });
     }

@@ -2,7 +2,7 @@ import BDS from '../dataSync';
 import bdsIpcBridge from '../bridges/ipc'; 
 
 function start() {
-    const bds = new BDS('server', undefined, ['world']);
+    const bds = new BDS('proxy.measures', 'server', undefined, ['world']);
     new bdsIpcBridge('measures', bds).startServer();
 
     bds.set('test0', { hello:'world', world: 'www'});

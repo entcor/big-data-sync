@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dataSync_1 = __importDefault(require("../dataSync"));
 const ipc_1 = __importDefault(require("../bridges/ipc"));
 function start() {
-    const bds = new dataSync_1.default('server', undefined, ['world']);
+    const bds = new dataSync_1.default('proxy.measures', 'server', undefined, ['world']);
     new ipc_1.default('measures', bds).startServer();
     bds.set('test0', { hello: 'world', world: 'www' });
     bds.set('test1', { hello: 'world' });
