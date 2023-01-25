@@ -60,6 +60,7 @@ export default class BDS<DataType> extends EventEmitter {
     private readonly cache?: CacheIf,
     private readonly fields: string[] = [],
     private readonly ttlCheckInterval: number = 0,
+    private readonly ttl: number = undefined,
   ) {
     super();    
     this.syncTime = new Date(0);
@@ -131,29 +132,36 @@ export default class BDS<DataType> extends EventEmitter {
     return Object.keys(this.$values).reduce((acc, key) => { acc[key] = this.$values[key].v; return acc; }, {});
   }
 
+  getExpireTime(ttl: number, date?: Date): Date{ 
+    const $ttl = ttl || this.ttl;
+    return $ttl ? new Date((date || new Date()).getTime() + $ttl * 1000) : undefined;
+  };
+
+
   set(k: string, v: DataType, ttl?: number): void {
     if (!v) v = undefined;
     const compareObj = pickAndSort(v, this.fields);
     const now = new Date();
-
+    
     logd(`bds(${this.id}) => set`, k, [this.id]);
-    logd(`bds(${this.id}) => set(test)`, this.$values[k] && compareObj.strObj === (this.$values[k].filteredStr || this.$values[k].str), compareObj.strObj, this.$values[k].filteredStr || this.$values[k].str, [this.id]);
+    logd(`bds(${this.id}) => set(test)`, this.$values[k] && compareObj.strObj === (this.$values[k].filteredStr || this.$values[k].str), compareObj.strObj, this.$values[k] && (this.$values[k].filteredStr || this.$values[k].str), [this.id]);
 
     if ((!this.$values[k] && !compareObj.strObj) || (this.$values[k] && compareObj.strObj === (this.$values[k].filteredStr || this.$values[k].str))) {
       // тут странно - не знаю как правильно но если фильтрующие поля не поменялись -> значение объекта все равно меняем (но толлько локально)
 
-      if (!this.$values[k] && v) this.$values[k] = { rt: now, v, str: undefined, filteredStr: undefined, expire: new Date((new Date).getTime() + ttl * 1000) };
+      if (!this.$values[k] && v) this.$values[k] = { rt: now, v, str: undefined, filteredStr: undefined, expire: this.getExpireTime(ttl) };
       else { this.$values[k].v = v; this.$values[k].rt = now; }
       return; // object is not changed
     }
 
     const str = compareObj.filtered ? JSON.stringify(v) : compareObj.strObj;
     const filteredStr = this.filtered ? compareObj.strObj : undefined;
+    const expire = this.getExpireTime(ttl);
 
     this.$values[k] = {
       rt: now, v, str,
       filteredStr,
-      expire: new Date((new Date).getTime() + ttl * 1000),
+      expire,
     };
 
     if (!v) {
@@ -163,7 +171,7 @@ export default class BDS<DataType> extends EventEmitter {
       return;
     }
 
-    if (this.cache) this.cache.set(k, now, str, filteredStr);
+    if (this.cache) this.cache.set(k, now, str, filteredStr, expire);
     this.emit("data", {
       data: {[k]: { str, v } || null},
       rt: now,
@@ -187,6 +195,7 @@ export default class BDS<DataType> extends EventEmitter {
   // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
   // server=>client (getSyncState) => client=>server(response), server => send changes 
   getSyncState(): BSSyncState {
+    if (!this.inited) return undefined;
 
     logd(`bds(${this.id}) => getSyncState(start)`, [this.id])
 
@@ -276,6 +285,7 @@ export default class BDS<DataType> extends EventEmitter {
   // метод клиента
   // межсерверная синхронизация (bulk - срезовая)
   setSyncItems(strData: string, bulk: boolean) {
+    if (!this.inited) return undefined;
 
     logd(`bds(${this.id}) => setSyncItems, len=`, strData.length, bulk, [this.id]);
 
@@ -316,7 +326,6 @@ export default class BDS<DataType> extends EventEmitter {
       
       // if (bulk) { // синхронизация куска данных - надо удалить все старое что не пришло - значит удалено
       //   for (const key in this.values) {
-      //     console.log("........", key, this.values[key].rt, rt, this.values[key].rt < rt)
       //     if (this.values[key].rt < rt) {
       //       const $val = this.values[key];
       //       delete this.values[key];
@@ -328,7 +337,7 @@ export default class BDS<DataType> extends EventEmitter {
 
       if (this.cache) {
         Object.keys(evData.data).forEach(key => {
-          this.cache.set(key, evData.data[key].rt, evData.data[key].str, undefined);
+          this.cache.set(key, evData.data[key].rt, evData.data[key].str, undefined, this.getExpireTime(this.ttl, evData.data[key].rt));
         })
       }
 

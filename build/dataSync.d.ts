@@ -27,11 +27,12 @@ export default class BDS<DataType> extends EventEmitter {
     private readonly cache?;
     private readonly fields;
     private readonly ttlCheckInterval;
+    private readonly ttl;
     private $values;
     private syncTime;
     private syncType;
     private inited;
-    constructor(id: string, mode: 'client' | 'server' | 'proxy', cache?: CacheIf, fields?: string[], ttlCheckInterval?: number);
+    constructor(id: string, mode: 'client' | 'server' | 'proxy', cache?: CacheIf, fields?: string[], ttlCheckInterval?: number, ttl?: number);
     private get filtered();
     get $cache(): CacheIf;
     checkTTL(): void;
@@ -44,6 +45,7 @@ export default class BDS<DataType> extends EventEmitter {
     values(): {
         [key: string]: DataType;
     };
+    getExpireTime(ttl: number, date?: Date): Date;
     set(k: string, v: DataType, ttl?: number): void;
     setBulk(data: {
         [key: string]: DataType;
@@ -57,7 +59,7 @@ export default class BDS<DataType> extends EventEmitter {
     pack(rt: Date, data: {
         [key: string]: BSValue<DataType>;
     }): string;
-    setSyncItems(strData: string, bulk: boolean): void;
+    setSyncItems(strData: string, bulk: boolean): any;
 }
 export {};
 //# sourceMappingURL=dataSync.d.ts.map

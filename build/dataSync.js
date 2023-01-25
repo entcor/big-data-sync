@@ -37,13 +37,14 @@ function pickAndSort(obj = {}, fields) {
 }
 ;
 class BDS extends events_1.EventEmitter {
-    constructor(id, mode, cache, fields = [], ttlCheckInterval = 0) {
+    constructor(id, mode, cache, fields = [], ttlCheckInterval = 0, ttl = undefined) {
         super();
         this.id = id;
         this.mode = mode;
         this.cache = cache;
         this.fields = fields;
         this.ttlCheckInterval = ttlCheckInterval;
+        this.ttl = ttl;
         this.$values = {};
         this.syncType = 'full';
         this.inited = false;
@@ -107,17 +108,22 @@ class BDS extends events_1.EventEmitter {
     values() {
         return Object.keys(this.$values).reduce((acc, key) => { acc[key] = this.$values[key].v; return acc; }, {});
     }
+    getExpireTime(ttl, date) {
+        const $ttl = ttl || this.ttl;
+        return $ttl ? new Date((date || new Date()).getTime() + $ttl * 1000) : undefined;
+    }
+    ;
     set(k, v, ttl) {
         if (!v)
             v = undefined;
         const compareObj = pickAndSort(v, this.fields);
         const now = new Date();
         logd(`bds(${this.id}) => set`, k, [this.id]);
-        logd(`bds(${this.id}) => set(test)`, this.$values[k] && compareObj.strObj === (this.$values[k].filteredStr || this.$values[k].str), compareObj.strObj, this.$values[k].filteredStr || this.$values[k].str, [this.id]);
+        logd(`bds(${this.id}) => set(test)`, this.$values[k] && compareObj.strObj === (this.$values[k].filteredStr || this.$values[k].str), compareObj.strObj, this.$values[k] && (this.$values[k].filteredStr || this.$values[k].str), [this.id]);
         if ((!this.$values[k] && !compareObj.strObj) || (this.$values[k] && compareObj.strObj === (this.$values[k].filteredStr || this.$values[k].str))) {
             // тут странно - не знаю как правильно но если фильтрующие поля не поменялись -> значение объекта все равно меняем (но толлько локально)
             if (!this.$values[k] && v)
-                this.$values[k] = { rt: now, v, str: undefined, filteredStr: undefined, expire: new Date((new Date).getTime() + ttl * 1000) };
+                this.$values[k] = { rt: now, v, str: undefined, filteredStr: undefined, expire: this.getExpireTime(ttl) };
             else {
                 this.$values[k].v = v;
                 this.$values[k].rt = now;
@@ -126,10 +132,11 @@ class BDS extends events_1.EventEmitter {
         }
         const str = compareObj.filtered ? JSON.stringify(v) : compareObj.strObj;
         const filteredStr = this.filtered ? compareObj.strObj : undefined;
+        const expire = this.getExpireTime(ttl);
         this.$values[k] = {
             rt: now, v, str,
             filteredStr,
-            expire: new Date((new Date).getTime() + ttl * 1000),
+            expire,
         };
         if (!v) {
             this.emit("delete", k, this.$values[k]);
@@ -139,7 +146,7 @@ class BDS extends events_1.EventEmitter {
             return;
         }
         if (this.cache)
-            this.cache.set(k, now, str, filteredStr);
+            this.cache.set(k, now, str, filteredStr, expire);
         this.emit("data", {
             data: { [k]: { str, v } || null },
             rt: now,
@@ -160,6 +167,8 @@ class BDS extends events_1.EventEmitter {
     // получаем время последней синхронизации и то, что было синхронизировано после последней полной синхронизации
     // server=>client (getSyncState) => client=>server(response), server => send changes 
     getSyncState() {
+        if (!this.inited)
+            return undefined;
         logd(`bds(${this.id}) => getSyncState(start)`, [this.id]);
         // полная синхронизация: {rt: sync Time, data: { key: rt, key2: rt }}
         // т.е. получаем полный список всех элементов хранилищя с их временем изменения
@@ -235,6 +244,8 @@ class BDS extends events_1.EventEmitter {
     // метод клиента
     // межсерверная синхронизация (bulk - срезовая)
     setSyncItems(strData, bulk) {
+        if (!this.inited)
+            return undefined;
         logd(`bds(${this.id}) => setSyncItems, len=`, strData.length, bulk, [this.id]);
         try {
             const items = strData.split(splitter).filter(el => !!el);
@@ -272,7 +283,6 @@ class BDS extends events_1.EventEmitter {
             });
             // if (bulk) { // синхронизация куска данных - надо удалить все старое что не пришло - значит удалено
             //   for (const key in this.values) {
-            //     console.log("........", key, this.values[key].rt, rt, this.values[key].rt < rt)
             //     if (this.values[key].rt < rt) {
             //       const $val = this.values[key];
             //       delete this.values[key];
@@ -283,7 +293,7 @@ class BDS extends events_1.EventEmitter {
             // }
             if (this.cache) {
                 Object.keys(evData.data).forEach(key => {
-                    this.cache.set(key, evData.data[key].rt, evData.data[key].str, undefined);
+                    this.cache.set(key, evData.data[key].rt, evData.data[key].str, undefined, this.getExpireTime(this.ttl, evData.data[key].rt));
                 });
             }
             if (Object.keys(evData.data).length)

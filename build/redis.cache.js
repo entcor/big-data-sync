@@ -43,13 +43,16 @@ class RedisCache {
                 .forEach(key => {
                 const rec = data[key];
                 const [rtstr, str, filteredStr, expire] = rec.split(splitter);
+                console.log('rec', rec);
                 try {
-                    res[key] = { rt: new Date(rtstr), str, filteredStr, expire: new Date(expire) };
+                    res[key] = { rt: new Date(rtstr), str: parseStr(str), filteredStr: parseStr(filteredStr), expire: parseTime(expire) };
                 }
                 catch (ex) { }
             });
             logd(`bds cache (${this.nodeId}) => cache restored`, Object.keys(res).length, [this.nodeId]);
             return res;
+            function parseStr(s) { return s === 'undefined' ? undefined : s; }
+            function parseTime(s) { return s === 'undefined' ? undefined : new Date(parseInt(s, 10)); }
         });
     }
 }
