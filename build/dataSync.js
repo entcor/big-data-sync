@@ -169,7 +169,7 @@ class BDS extends events_1.EventEmitter {
                 prev[key] = this.$values[key].rt;
                 return prev;
             }, {});
-            logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`, () => Object.keys(syncRtList).slice(0, 5).reduce((agg, key) => { agg[key] = syncRtList[key]; return agg; }), [this.id]);
+            logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`, () => Object.keys(syncRtList).slice(0, 5).reduce((agg, key) => { agg[key] = syncRtList[key]; return agg; }, {}), [this.id]);
             return {
                 rt: this.syncTime,
                 data: syncRtList,
