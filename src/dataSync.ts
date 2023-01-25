@@ -56,7 +56,7 @@ export default class BDS<DataType> extends EventEmitter {
 
   constructor(
     readonly id: string,
-    private readonly mode: 'client' | 'server' | 'proxy' = 'server',
+    private readonly mode: 'client' | 'server' | 'proxy',
     private readonly cache?: CacheIf,
     private readonly fields: string[] = [],
     private readonly ttlCheckInterval: number = 0,

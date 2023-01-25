@@ -37,7 +37,7 @@ function pickAndSort(obj = {}, fields) {
 }
 ;
 class BDS extends events_1.EventEmitter {
-    constructor(id, mode = 'server', cache, fields = [], ttlCheckInterval = 0) {
+    constructor(id, mode, cache, fields = [], ttlCheckInterval = 0) {
         super();
         this.id = id;
         this.mode = mode;

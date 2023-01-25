@@ -31,7 +31,7 @@ export default class BDS<DataType> extends EventEmitter {
     private syncTime;
     private syncType;
     private inited;
-    constructor(id: string, mode?: 'client' | 'server' | 'proxy', cache?: CacheIf, fields?: string[], ttlCheckInterval?: number);
+    constructor(id: string, mode: 'client' | 'server' | 'proxy', cache?: CacheIf, fields?: string[], ttlCheckInterval?: number);
     private get filtered();
     get $cache(): CacheIf;
     checkTTL(): void;
