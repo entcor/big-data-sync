@@ -287,7 +287,7 @@ export default class BDS<DataType> extends EventEmitter {
   setSyncItems(strData: string, bulk: boolean) {
     if (!this.inited) return undefined;
 
-    logd(`bds(${this.id}) => setSyncItems, len=`, strData.length, bulk, [this.id]);
+    logd(`bds(${this.id}) => setSyncItemss, len=`, strData.length, bulk, [this.id]);
 
     try {
       const items = strData.split(splitter).filter(el => !!el);
@@ -307,9 +307,6 @@ export default class BDS<DataType> extends EventEmitter {
       }
 
       if (bulk) this.syncTime = rt;
-
-      console.log('!!!!!!!!!', strData, data);
-
       const evData: DataEvent<DataType> = { data: {}, rt, bulk };
       Object.keys(data).forEach(key => {
         if (data[key] === null) {
