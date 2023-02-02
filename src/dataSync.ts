@@ -308,6 +308,8 @@ export default class BDS<DataType> extends EventEmitter {
 
       if (bulk) this.syncTime = rt;
 
+      console.log('!!!!!!!!!', strData, data);
+
       const evData: DataEvent<DataType> = { data: {}, rt, bulk };
       Object.keys(data).forEach(key => {
         if (data[key] === null) {

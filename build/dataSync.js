@@ -265,6 +265,7 @@ class BDS extends events_1.EventEmitter {
             }
             if (bulk)
                 this.syncTime = rt;
+            console.log('!!!!!!!!!', strData, data);
             const evData = { data: {}, rt, bulk };
             Object.keys(data).forEach(key => {
                 if (data[key] === null) {
