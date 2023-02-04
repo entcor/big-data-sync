@@ -83,7 +83,10 @@ export default class BDS<DataType> extends EventEmitter {
     const now = new Date();
     Object.keys(this.$values).forEach((key: string) => {
       const $data = this.$values[key];
-      if ($data.expire && $data.expire > now) {
+
+      console.log(">>>>", key, $data.expire);
+
+      if (!$data.expire || ($data.expire && $data.expire > now)) {
         delete this.$values[key];
         if (this.cache) this.cache.delete(key); 
       }
