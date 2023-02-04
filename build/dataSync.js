@@ -15,6 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
 const etaglogger_1 = __importDefault(require("etaglogger"));
 const splitter = '#@%@#';
+function isValidDate(d) {
+    return d instanceof Date && !isNaN(d.getTime());
+}
 const logd = (0, etaglogger_1.default)('BDS');
 // realTimeSync: server (set) => send to client (clnt.setFromServer()) => client.onData()
 // при изменени параметра - сервер передаст изменение на клиент
@@ -66,7 +69,7 @@ class BDS extends events_1.EventEmitter {
         Object.keys(this.$values).forEach((key) => {
             const $data = this.$values[key];
             console.log(">>>>", key, $data.expire);
-            if (!$data.expire || ($data.expire && $data.expire > now)) {
+            if (!$data.expire || !isValidDate($data.expire) || ($data.expire && $data.expire > now)) {
                 delete this.$values[key];
                 if (this.cache)
                     this.cache.delete(key);

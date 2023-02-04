@@ -3,6 +3,10 @@ import { CacheIf } from "./interfaces";
 import TagLogger from 'etaglogger';
 const splitter = '#@%@#';
 
+function isValidDate(d: Date) {
+  return d instanceof Date && !isNaN(d.getTime());
+}
+
 const logd = TagLogger('BDS');
 
 // realTimeSync: server (set) => send to client (clnt.setFromServer()) => client.onData()
@@ -86,7 +90,7 @@ export default class BDS<DataType> extends EventEmitter {
 
       console.log(">>>>", key, $data.expire);
 
-      if (!$data.expire || ($data.expire && $data.expire > now)) {
+      if (!$data.expire || !isValidDate($data.expire) || ($data.expire && $data.expire > now)) {
         delete this.$values[key];
         if (this.cache) this.cache.delete(key); 
       }
