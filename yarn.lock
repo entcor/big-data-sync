@@ -566,9 +566,10 @@ etag@~1.8.1:
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==
 
-etaglogger@entcor/taglogger:
-  version "0.0.5"
-  resolved "https://codeload.github.com/entcor/taglogger/tar.gz/d15a09b83ce15ed86717cc3fb1e9f74ac8f51cdf"
+etaglogger@^0.0.10:
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/etaglogger/-/etaglogger-0.0.10.tgz#86931598a0c785cc23a05e50b65723f9c63e1a0f"
+  integrity sha512-X6QxLWSB/VzGZ2826OI1u1qS2Y0RoQDyJPRMWiOGWMWT1VxAFL85TC3isn+XhxY93wR8LMvcq48A4GwoMAg2cg==
 
 event-pubsub@5.0.3:
   version "5.0.3"

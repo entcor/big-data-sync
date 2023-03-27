@@ -1,6 +1,6 @@
 {
   "name": "@entcor/big-data-sync",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "author": "Alexey P Nikitin (entcor)",
   "description": "",
   "main": "build/index.js",
@@ -13,7 +13,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "etaglogger": "entcor/taglogger",
+    "etaglogger": "^0.0.10",
     "node-ipc": "^11.1.0"
   },
   "devDependencies": {
