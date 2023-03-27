@@ -1165,13 +1165,15 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-"node-ipc@git+http://uni-as.uni-eng.ru:7990/scm/mosaic/lib-node-ipc.git":
-  version "10.1.0"
-  resolved "git+http://uni-as.uni-eng.ru:7990/scm/mosaic/lib-node-ipc.git#a2e2947899648dce03215d78b5cdc69b9b113d99"
+node-ipc@^11.1.0:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/node-ipc/-/node-ipc-11.1.0.tgz#c44ae44df7b2557076212cdb6a5cebf794a20906"
+  integrity sha512-BfE098Uyx06O//uatDNbSNxa5HLejwd2gV33yU0VfYv5wm4e22Um3VnNTOacqSxcl02v4fx6ZNUqJG9ZK+0Ufg==
   dependencies:
     event-pubsub "5.0.3"
     js-message "1.0.7"
     js-queue "2.0.2"
+    peacenotwar "^9.1.5"
     strong-type "^1.0.1"
 
 noms@0.0.0:
@@ -1365,6 +1367,11 @@ path-type@^3.0.0:
   integrity sha512-T2ZUsdZFHgA3u4e5PfPbjd7HDDpxPnQb5jN0SrDsjNSuVXHJqtwTnWqG0B1jZrgmJ/7lj1EmVIByWt1gxGkWvg==
   dependencies:
     pify "^3.0.0"
+
+peacenotwar@^9.1.5:
+  version "9.1.7"
+  resolved "https://registry.yarnpkg.com/peacenotwar/-/peacenotwar-9.1.7.tgz#9e8a840675aa187e1acf9f25b8be8d1f8219afc9"
+  integrity sha512-tMTCcK/MFZQXg6cJPYv1rYAU5V4G1jw7vyJ6cxX35BZ+Jb58of7TTTwktK6LCGouPlyEkIDFLT0KYq/hE1Lstg==
 
 pidtree@^0.3.0:
   version "0.3.1"
