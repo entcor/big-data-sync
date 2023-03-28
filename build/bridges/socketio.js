@@ -12,6 +12,8 @@ class SioBridge {
     }
     startServer(sio) {
         sio.on('connection', (socket) => {
+            let client = socket;
+            logd(`ipc server (${this.bds.id}) => client connected`, this.nodeId, [this.bds.id]);
             const bdsEvent_onData = ($d) => {
                 if (client)
                     client.emit(`${this.nodeId}:list:rtdata`, this.bds.pack($d.rt, $d.data));
@@ -20,8 +22,6 @@ class SioBridge {
                 if (client)
                     client.emit(`${this.nodeId}:list:rtdata`, this.bds.pack(new Date(), { [id]: undefined }));
             };
-            logd(`ipc server (${this.bds.id}) => client connected`, this.nodeId, [this.bds.id]);
-            let client = socket;
             socket.on('disconnect', () => {
                 logd(`ipc server (${this.bds.id}) => dconnect`, this.nodeId, [this.bds.id]);
                 this.bds.off('data', bdsEvent_onData);

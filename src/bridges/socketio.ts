@@ -10,15 +10,14 @@ export default class SioBridge<DataType> {
   
   startServer(sio) {
     sio.on('connection', (socket) => {
+      let client = socket;
+      logd(`ipc server (${this.bds.id}) => client connected`, this.nodeId, [this.bds.id]); 
+
       const bdsEvent_onData = ($d: DataEvent<DataType>)=> {
         if (client) client.emit(`${this.nodeId}:list:rtdata`, this.bds.pack($d.rt, $d.data) )};
 
       const bdsEvent_onDelete = (id: string)=> {
         if (client) client.emit(`${this.nodeId}:list:rtdata`, this.bds.pack(new Date(), { [id]: undefined }) )};
-      
-      logd(`ipc server (${this.bds.id}) => client connected`, this.nodeId, [this.bds.id]); 
-
-      let client = socket;
 
       socket.on('disconnect', () => {
         logd(`ipc server (${this.bds.id}) => dconnect`, this.nodeId, [this.bds.id]); 

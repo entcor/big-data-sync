@@ -216,7 +216,7 @@ export default class BDS<DataType> extends EventEmitter {
           }, {} as any);
 
         logd(`bds(${this.id}) => getSyncState(finish)`, () => `count=${Object.keys(syncRtList).length}`, () => Object.keys(syncRtList).slice(0, 5).reduce((agg, key) => { agg[key] = syncRtList[key]; return agg; }, {}), [this.id]);
-        
+
         return {
             rt: this.syncTime,
             data: syncRtList,
@@ -241,10 +241,9 @@ export default class BDS<DataType> extends EventEmitter {
 
     if (this.syncType === 'full') {
 
-      const srcIdList = Object.keys(this.$values);
       const destIdList = Object.keys(clientData.data);
+      const deletedItems = destIdList.reduce((agg, $id) => { if (!this.$values[$id]) agg.push($id); return agg; }, []);
 
-      const deletedItems = destIdList.filter(x => !srcIdList.includes(x));
       deletedItems.forEach(key => {
         strItems.push(`${key}${splitter}undefined`);
       })
