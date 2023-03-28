@@ -106,7 +106,7 @@ export default class BDS<DataType> extends EventEmitter {
         if (data[key].str !== 'false') {
           this.$values[key] = {
             rt: data[key].rt,
-            v: this.mode !== 'proxy' && JSON.parse(data[key].str),
+            v: this.mode === 'proxy' ? undefined : JSON.parse(data[key].str),
             str: this.mode !== 'client' && data[key].str,
             filteredStr: this.mode !== 'client' && data[key].filteredStr,
             expire: data[key].expire,
