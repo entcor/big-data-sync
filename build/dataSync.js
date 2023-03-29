@@ -85,7 +85,7 @@ class BDS extends events_1.EventEmitter {
                     if (data[key].str !== 'false') {
                         this.$values[key] = {
                             rt: data[key].rt,
-                            v: this.mode !== 'proxy' && JSON.parse(data[key].str),
+                            v: this.mode === 'proxy' ? undefined : JSON.parse(data[key].str),
                             str: this.mode !== 'client' && data[key].str,
                             filteredStr: this.mode !== 'client' && data[key].filteredStr,
                             expire: data[key].expire,
@@ -202,9 +202,9 @@ class BDS extends events_1.EventEmitter {
         const strItems = [];
         logd(`bds(${this.id}) => getDataForSync(start)`, () => Object.keys(clientData.data).length, () => Object.keys(clientData.data).slice(0, 5).map(key => clientData.data[key]), [this.id]);
         if (this.syncType === 'full') {
-            const srcIdList = Object.keys(this.$values);
             const destIdList = Object.keys(clientData.data);
-            const deletedItems = destIdList.filter(x => !srcIdList.includes(x));
+            const deletedItems = destIdList.reduce((agg, $id) => { if (!this.$values[$id])
+                agg.push($id); return agg; }, []);
             deletedItems.forEach(key => {
                 strItems.push(`${key}${splitter}undefined`);
             });
