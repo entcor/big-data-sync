@@ -19,6 +19,7 @@ export default class Bridge<DataType> {
 
       this.ipc.config.id = this.nodeId;
       this.ipc.config.retry= 1500;
+      this.ipc.config.logDepth = 0;
       
       this.ipc.serve(
         () => {
