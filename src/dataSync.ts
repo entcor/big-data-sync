@@ -3,6 +3,8 @@ import { CacheIf } from "./interfaces";
 import TagLogger from 'etaglogger';
 const splitter = '#@%@#';
 
+const MAX_SYNC_DATA_LENGTH = 1;
+
 function isValidDate(d: Date) {
   return d instanceof Date && !isNaN(d.getTime());
 }
@@ -259,7 +261,10 @@ export default class BDS<DataType> extends EventEmitter {
             strItems.push(`${key}${splitter}${this.$values[key].str}`);
           }
 
-          if (strItems.length > 1000) return true;
+          if (strItems.length > MAX_SYNC_DATA_LENGTH) {
+            strItems.push(`__reachMaxSyncDataLength${splitter}undefined`);
+            return true;
+          } 
           return false;
         });
 
@@ -290,14 +295,20 @@ export default class BDS<DataType> extends EventEmitter {
 
   // метод клиента
   // межсерверная синхронизация (bulk - срезовая)
-  setSyncItems(strData: string, bulk: boolean) {
-    if (!this.inited) return undefined;
+  // возвращает уведомление о необходимости повторной синхронизации (true - нужна)
+  // повторная синхронизация необходима, если на все данные поместились в пакет для синхронизации
+  setSyncItems(strData: string, bulk: boolean): boolean {
+    if (!this.inited) return false;
+
+    console.log(strData)
 
     logd(`bds(${this.id}) => setSyncItemss, len=`, strData.length, bulk, [this.id]);
 
     try {
       const items = strData.split(splitter).filter(el => !!el);
       const rt = new Date(items.shift());
+
+      const needNextSync = items[items.length-2] === '__reachMaxSyncDataLength'; 
 
       const data = {};
       for (let i=0; i < items.length; i += 2) {
@@ -347,8 +358,11 @@ export default class BDS<DataType> extends EventEmitter {
       }
 
       if (Object.keys(evData.data).length) this.emit("data", evData );
+
+      return needNextSync;
     } catch (ex) {
       this.emit('error', ex.message);
+      return false;
     }
   }
 }

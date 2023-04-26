@@ -66,7 +66,9 @@ class Bridge {
             this.ipc.of[this.nodeId].on('list:syncData', //срезовая синхронизация
             (syncData) => {
                 logd(`IPC client (${this.bds.id}) => setSyncItems`, [this.bds.id]);
-                this.bds.setSyncItems(syncData, true);
+                if (this.bds.setSyncItems(syncData, true)) {
+                    sendSyncState();
+                }
             });
             this.ipc.of[this.nodeId].on('list:rtdata', //real time data - при изменении параметра
             (rtData) => {

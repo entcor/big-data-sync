@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
 const etaglogger_1 = __importDefault(require("etaglogger"));
 const splitter = '#@%@#';
+const MAX_SYNC_DATA_LENGTH = 1;
 function isValidDate(d) {
     return d instanceof Date && !isNaN(d.getTime());
 }
@@ -217,8 +218,10 @@ class BDS extends events_1.EventEmitter {
                     logd(`bds(${this.id}) => compare->upd`, key, this.$values[key].rt, new Date(clientData.data[key])),
                         strItems.push(`${key}${splitter}${this.$values[key].str}`);
                 }
-                if (strItems.length > 1000)
+                if (strItems.length > MAX_SYNC_DATA_LENGTH) {
+                    strItems.push(`__reachMaxSyncDataLength${splitter}undefined`);
                     return true;
+                }
                 return false;
             });
             logd(`bds(${this.id}) => getDataForSync(finish)`, () => `count=${strItems.length}`, [this.id]);
@@ -247,13 +250,17 @@ class BDS extends events_1.EventEmitter {
     }
     // метод клиента
     // межсерверная синхронизация (bulk - срезовая)
+    // возвращает уведомление о необходимости повторной синхронизации (true - нужна)
+    // повторная синхронизация необходима, если на все данные поместились в пакет для синхронизации
     setSyncItems(strData, bulk) {
         if (!this.inited)
-            return undefined;
+            return false;
+        console.log(strData);
         logd(`bds(${this.id}) => setSyncItemss, len=`, strData.length, bulk, [this.id]);
         try {
             const items = strData.split(splitter).filter(el => !!el);
             const rt = new Date(items.shift());
+            const needNextSync = items[items.length - 2] === '__reachMaxSyncDataLength';
             const data = {};
             for (let i = 0; i < items.length; i += 2) {
                 if (items[i + 1] === 'false') {
@@ -302,9 +309,11 @@ class BDS extends events_1.EventEmitter {
             }
             if (Object.keys(evData.data).length)
                 this.emit("data", evData);
+            return needNextSync;
         }
         catch (ex) {
             this.emit('error', ex.message);
+            return false;
         }
     }
 }

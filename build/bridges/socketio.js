@@ -51,7 +51,9 @@ class SioBridge {
             sendSyncState();
         });
         sio_client.on(`${this.nodeId}:list:syncData`, (syncData) => {
-            this.bds.setSyncItems(syncData, true);
+            if (this.bds.setSyncItems(syncData, true)) {
+                sendSyncState();
+            }
         });
         sio_client.on(`${this.nodeId}:list:rtdata`, //real time data - при изменении параметра
         (rtData) => {

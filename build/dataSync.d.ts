@@ -59,7 +59,7 @@ export default class BDS<DataType> extends EventEmitter {
     pack(rt: Date, data: {
         [key: string]: BSValue<DataType>;
     }): string;
-    setSyncItems(strData: string, bulk: boolean): any;
+    setSyncItems(strData: string, bulk: boolean): boolean;
 }
 export {};
 //# sourceMappingURL=dataSync.d.ts.map
