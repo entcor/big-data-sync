@@ -3,7 +3,7 @@ import { CacheIf } from "./interfaces";
 import TagLogger from 'etaglogger';
 const splitter = '#@%@#';
 
-const MAX_SYNC_DATA_LENGTH = 1;
+const MAX_SYNC_DATA_LENGTH = 1000;
 
 function isValidDate(d: Date) {
   return d instanceof Date && !isNaN(d.getTime());

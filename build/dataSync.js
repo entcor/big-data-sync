@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
 const etaglogger_1 = __importDefault(require("etaglogger"));
 const splitter = '#@%@#';
-const MAX_SYNC_DATA_LENGTH = 1;
+const MAX_SYNC_DATA_LENGTH = 1000;
 function isValidDate(d) {
     return d instanceof Date && !isNaN(d.getTime());
 }
