@@ -91,8 +91,6 @@ export default class BDS<DataType> extends EventEmitter {
       const $data = this.$values[key];
 
       if (!$data.expire || !isValidDate($data.expire) || ($data.expire && $data.expire < now)) {
-        console.log("delete bds:", $data.expire, now, key)
-
         delete this.$values[key];
         if (this.cache) this.cache.delete(key); 
       }
@@ -299,9 +297,6 @@ export default class BDS<DataType> extends EventEmitter {
   // повторная синхронизация необходима, если на все данные поместились в пакет для синхронизации
   setSyncItems(strData: string, bulk: boolean): boolean {
     if (!this.inited) return false;
-
-    console.log(strData)
-
     logd(`bds(${this.id}) => setSyncItemss, len=`, strData.length, bulk, [this.id]);
 
     try {

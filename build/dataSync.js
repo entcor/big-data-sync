@@ -70,7 +70,6 @@ class BDS extends events_1.EventEmitter {
         Object.keys(this.$values).forEach((key) => {
             const $data = this.$values[key];
             if (!$data.expire || !isValidDate($data.expire) || ($data.expire && $data.expire < now)) {
-                console.log("delete bds:", $data.expire, now, key);
                 delete this.$values[key];
                 if (this.cache)
                     this.cache.delete(key);
@@ -255,7 +254,6 @@ class BDS extends events_1.EventEmitter {
     setSyncItems(strData, bulk) {
         if (!this.inited)
             return false;
-        console.log(strData);
         logd(`bds(${this.id}) => setSyncItemss, len=`, strData.length, bulk, [this.id]);
         try {
             const items = strData.split(splitter).filter(el => !!el);
